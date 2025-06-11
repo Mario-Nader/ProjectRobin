@@ -5,6 +5,8 @@ async function view_scores(req,res){
   let  patrols = await patrol.find({"name":{$ne:"kadr"}}).exec();
   return patrols
 }
+
+
 async function update_scores(req,res){
   let user = scout.findById(req.id);
   if(user.chef == true){
@@ -19,6 +21,8 @@ async function update_scores(req,res){
     })
   }
 }
+
+
 async function buy(req,res){
   let user = scout.findById(req.id);
   if(user.cp == true){
@@ -50,6 +54,8 @@ async function buy(req,res){
         })
   }
 }
+
+
 
 function assetMap(name){
  switch(name) {

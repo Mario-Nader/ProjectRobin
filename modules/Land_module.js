@@ -10,7 +10,7 @@ const landSchema = new mongoose.Schema({
     ref: 'Patrol',
     required: true
   },
-  crops: {
+  soils: {
     wheat: {
       type: Number,
        required: true
@@ -22,28 +22,25 @@ const landSchema = new mongoose.Schema({
     apple: {
       type: Number,
       required: true
+    },
+    empty: {
+      type: Number,
+      required: true
     }
   },
   houses: {
     type: Number,
      required: true
   },
-  horses: {
-    type: Number,
-    required: true
-  },
   soldiers: {
-    type: Number,
-    required: true
-  },
-  carts: {
     type: Number,
     required: true
   },
   workshop: {
     type: Boolean,
     required: true
-  },inventory:{
+  },
+  inventory:{
     wheat:{
       type:Number,
       required:true,
@@ -58,6 +55,10 @@ const landSchema = new mongoose.Schema({
   adjacent:{
     type:[Number],
     required:true
+  },
+  soil_no: {
+    type:Number,
+    required: true
   }
 });
 

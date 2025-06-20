@@ -59,6 +59,28 @@ const landSchema = new mongoose.Schema({
   soil_no: {
     type:Number,
     required: true
+  },
+  conditions:{
+    "soldiers":{
+      type:Number,
+      required:true
+    },
+    "houses":{
+      type:Number,
+      required:true
+    },
+    "lands":{
+      type:Number,
+      required:true
+    },
+    "coins":{
+      type:Number,
+      required:true
+    },
+    "inLandSoldiers":{
+      type:Number,
+      required:true
+    }
   }
 });
 

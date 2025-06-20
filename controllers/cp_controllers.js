@@ -1,5 +1,7 @@
-
-
+const Patrol = require("../modules/patrol_module")
+const lands = require("../modules/Land_module")
+const assets = require("../modules/assets_module")
+const scouts = require("../modules/scout_module")
 
 async function buy(req,res){//need to add comment here
   let user = scout.findById(req.id);//grab the user by the ID
@@ -111,3 +113,65 @@ function assetMap(name){//map the name in the assets with the names in the patro
     return name
 }
 }
+
+async function transport(req,res)
+{
+    let id = req.id
+    let user = await scouts.findById(id).exec()
+    if(user.cp == true){
+    let patrolName = req.patrol
+    let pat = await Patrol.findOne({name:patrolName}).exec();
+    let initialNo = req.intialLand
+    let finalNo= req.finalLand
+    let initial = await lands.findOne({land_no : initialNo}).exec()
+    let final = await lands.findOne({land_no : finalNo}).exec()
+    if(initial.patrol_ID != pat._id && final.patrol_ID != pat._id){
+        res.status(400).send({
+            message:"the patrol doesn't own both lands"
+        })
+    }else if(intial.patrol_ID != pat._id){
+        res.status(400),send({
+            message:"the patrol doesn't own the inital land"
+        })
+    }else if(final.patrol_ID != pat._id){
+        res.status(400).send({message:"the patrol doesn't own the final land"})
+    }else{
+        let typeName = req.typeName
+        let type = await assets.findOne({asset : typeName}).exec()
+        let quantity = req.quantity
+        let horses = req.horses
+        let rentHorses = req.rentHorses
+        let carts = req.carts
+        let rentCarts = req.rentCarts
+        if(type.asset == "soldier"){
+            if(initial.soldiers <= quantity){
+                res.status(400).send({message:"the inital land doesn't have enough resources"})
+            }else{
+                let neededPower = quantity
+            }
+        }else{
+            let notEnough = false
+            if(type.asset == "apple"){
+                if(initial.inventory.apple <= quantity){
+                    notEnough = true
+                }
+            }else if(type.asset == "watermelon"){
+                if(intital.inventory.watermelon <= quantity){
+                    e;'w'
+                }
+            }
+        }
+    }
+    }else{
+        res.status(403).send(
+            {
+                message:"must be a cp to enter"
+            }
+        )
+    }
+}
+
+
+
+
+module.exports = {buy}

@@ -4,16 +4,17 @@ const app = express();
 const port = 3000;
 const {connectDB} = require('./DB.js');
 const authRoute = require('./routes/authRoutes.js')
-const usersRoute = require('./routes/usersRoutes.js')
-const todoRoute = require('./routes/todoRoutes.js')
+const cpRoute = require('./routes/cpRoutes.js')
+const chefRoute = require('./routes/chefRoutes.js')
+const scoutRoute = require('./routes/scoutRoutes.js')
 app.listen(port, () => {
   connectDB();
   console.log(`Server is running on port ${port}`);
 });
 app.use(cookieParser());
 app.use(express.json());
-app.use('/user',usersRoute)
-app.use('/todo',todoRoute)
-app.use('/auth',authRoute)
+app.use('/Chef',chefRoute)
+app.use('/CP',cpRoute)
+app.use('/Scout',scoutRoute)
 
 

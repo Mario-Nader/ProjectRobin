@@ -1,31 +1,4 @@
-const patrol = require('../modules/patrol_module')
-const scout = rqeuire('../modules/scout_module')
-const assets = require('../modules/assets_module')
-const lands = require('../modules/Land_module')
 
-async function view_scores(req,res){
-  let  patrols = await patrol.find({"name":{$ne:"kadr"}}).exec();
-  return patrols
-}
-
-
-async function update_scores(req,res){
-  let user = scout.findById(req.id);
-  if(user.chef == true){
-    //num->incrementation or decrementation amound where the decremntation is presented as a negative amount
-    //pat_name is the name of the patrol to extract the patrol from the database
-    let num = req.num;
-    let pat_name = req.patrol;
-    let patrol = await patrol.find({name:pat_name}).exec()
-    //updating the coin amount of the patrol and saving the new coin amount
-    patrol.coins = patrol.coins + num;
-    await patrol.save();
-  }else{//the user is not a chef therfore don't have the premession to preforme such process
-    res.status(401).send({
-      message:"unauthorized access"
-    })
-  }
-}
 
 
 async function buy(req,res){//need to add comment here
@@ -122,8 +95,6 @@ async function buy(req,res){//need to add comment here
   }
 }
 
-
-
 function assetMap(name){//map the name in the assets with the names in the patrol module the work with the buy function
  switch(name) {
   case soldier:
@@ -140,6 +111,3 @@ function assetMap(name){//map the name in the assets with the names in the patro
     return name
 }
 }
-
-
-module.exports = {view_scores,update_scores,buy}

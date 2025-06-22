@@ -139,7 +139,7 @@ if(user){
       }else if(final.patrol_ID != pat._id){//the final land is not owned by the patrol
           res.status(400).send({message:"the patrol doesn't own the final land"})
       }else if(pat.tot_horses < horses || pat.tot_carts < carts || pat.rentCart < rentCarts || pat.rentHorse < rentHorses){//the patrol doesn't have the required means
-          res.status(400).send({message:"the patrol doesn't have enough means of transport"})
+          res.status(400).send({message:"patrol doesn't have the given number of means"})
       }else{
           let typeName = req.typeName
           let type = await assets.findOne({asset : typeName}).exec()
@@ -184,6 +184,7 @@ if(user){
                   pat.rentHorse -= rentHorses
                   pat.rentCart -= rentCarts
                   await pat.save()
+                  res.status(204).send({message:"was transported successfully"})
               }
               }
           }
@@ -200,7 +201,31 @@ if(user){
 }
 }
 
+async function singleLandResources(landNo){
+  try{
+  let land = await lands.findOne({land_no:landNo}).exec()
+  let landData = {
+    "apple":land.inventory.apple,
+    "watermelon":land.inventory.watermelon,
+    "wheat":land.inventory.wheat,
+    "soldiers":land.soldiers
+  }
+  return landData
+  }catch(err){
+    console.log(err)
+  }
 
+}
+
+async function twoLandsResources(req,res) {
+  try{
+  let starting = await singleLandResources(req.initialLandNo)
+  let finishing = await singleLandResources(req.finalLandNo)
+  }catch(err){
+    console.log(err)
+    res.status(500).send({message:"internal server error in the twoLandsResources"})
+  }
+}
 
 
 module.exports = {buy, transport}

@@ -43,9 +43,6 @@ patrolSchema = mongoose.Schema({
     },tot_workshops:{
         type:Number,
         required:true,
-    },currentGDP:{
-        type:Number,
-        require:true,
     },tot_lands:{
         type:Number,
         required:true,

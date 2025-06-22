@@ -16,9 +16,6 @@ const ScoutsSchema = new mongoose.Schema({
     },patrol:{
         type:mongoose.Types.ObjectId,
         ref : "Patrol",
-    },chef:{
-        type:Boolean,
-        required:true,
     }
 });
 

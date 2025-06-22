@@ -8,9 +8,4 @@ const auth = require('../controllers/auth_controllers')
 
 
 
-
-
-
-
-
 module.exports = router

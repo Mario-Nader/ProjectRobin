@@ -13,9 +13,23 @@ patrolSchema = mongoose.Schema({
         type:Number,
         required:true
     },
-    tot_crop:{
-        type:Number,
-        required:true,
+    soils:{
+        apple:{
+            type:Number,
+            required:true
+        },
+        wheat:{
+            type:Number,
+            required:true
+        },
+        watermelon:{
+            type:Number,
+            required:true
+        },
+        empty:{
+            type:Number,
+            required:true
+        },
     },
     tot_houses:{
         type:Number,

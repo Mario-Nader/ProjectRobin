@@ -113,65 +113,94 @@ function assetMap(name){//map the name in the assets with the names in the patro
     return name
 }
 }
-
+//process
 async function transport(req,res)
 {
     let id = req.id
     let user = await scouts.findById(id).exec()
-    if(user.cp == true){
+if(user){
+    if(user.cp == true){//if the user is a cp he can preform the action
     let patrolName = req.patrol
     let pat = await Patrol.findOne({name:patrolName}).exec();
     let initialNo = req.intialLand
     let finalNo= req.finalLand
     let initial = await lands.findOne({land_no : initialNo}).exec()
     let final = await lands.findOne({land_no : finalNo}).exec()
-    if(initial.patrol_ID != pat._id && final.patrol_ID != pat._id){
-        res.status(400).send({
-            message:"the patrol doesn't own both lands"
-        })
-    }else if(intial.patrol_ID != pat._id){
-        res.status(400),send({
-            message:"the patrol doesn't own the inital land"
-        })
-    }else if(final.patrol_ID != pat._id){
-        res.status(400).send({message:"the patrol doesn't own the final land"})
-    }else{
-        let typeName = req.typeName
-        let type = await assets.findOne({asset : typeName}).exec()
-        let quantity = req.quantity
-        let horses = req.horses
-        let rentHorses = req.rentHorses
-        let carts = req.carts
-        let rentCarts = req.rentCarts
-        if(type.asset == "soldier"){
-            if(initial.soldiers <= quantity){
-                res.status(400).send({message:"the inital land doesn't have enough resources"})
-            }else{
-                let neededPower = quantity
-            }
-        }else{
-            let notEnough = false
-            if(type.asset == "apple"){
-                if(initial.inventory.apple <= quantity){
-                    notEnough = true
-                }
-            }else if(type.asset == "watermelon"){
-                if(intital.inventory.watermelon <= quantity){
-                    e;'w'
-                }
-            }
-        }
-    }
-    }else{
+    if(initialNo == finalNo){//if both numbers are equal
+      res.status(400).send({message:"both lands are the same land"})
+    }else if(initial.patrol_ID != pat._id && final.patrol_ID != pat._id){//the two lands are not owned by the patrol
+          res.status(400).send({
+              message:"the patrol doesn't own both lands"
+          })
+      }else if(intial.patrol_ID != pat._id){//the inital land only is not owned by the patrol
+          res.status(400),send({
+              message:"the patrol doesn't own the inital land"
+          })
+      }else if(final.patrol_ID != pat._id){//the final land is not owned by the patrol
+          res.status(400).send({message:"the patrol doesn't own the final land"})
+      }else if(pat.tot_horses < horses || pat.tot_carts < carts || pat.rentCart < rentCarts || pat.rentHorse < rentHorses){//the patrol doesn't have the required means
+          res.status(400).send({message:"the patrol doesn't have enough means of transport"})
+      }else{
+          let typeName = req.typeName
+          let type = await assets.findOne({asset : typeName}).exec()
+          let quantity = req.quantity
+          let horses = req.horses
+          let rentHorses = req.rentHorses
+          let carts = req.carts
+          let rentCarts = req.rentCarts
+          if(type.asset == "soldier"){
+              if(initial.soldiers <= quantity){//the land doesn't have enough soldiers to send and keep at least one soldier in the land
+                  res.status(400).send({message:"the inital land doesn't have enough resources"})
+              }else{// calculating the needed power for soldiers
+                  let neededPower = quantity
+                  let power = horses + rentHorses + (carts * 5)  +  (rentCarts * 5)
+              }
+              if(neededPower > power){//if the trasportation means don't cover the needed power
+                res.status(400).send({message:"the transportation power is not enough"})
+              }
+          }else{
+              if(initial.inventory[type.asset] < quantity){//the land doesn't have enough resources to send
+                  res.status(400).send({
+                      message:"the intial land doesn't have enough resources"
+                  })
+              }else{//calculating needed and provided power to trasnport (wheat / apple / watermelon)
+                  let neededPower = quantity
+                  let power = horses + rentHorses + (carts * 3)  +  (rentCarts * 3)
+              }
+              if(neededPower > power){//if the trasportation means don't cover the needed power
+                res.status(400).send({message:"the transportation power is not enough"})
+              }else{
+                  if(power - neededPower >= 3 && (carts + rentCarts) != 0){// if cart(s) can be removed and still cover the power needed
+                  let removed  = (power - neededPower) / 3
+                  res.status(400).send({message:`you can remove at least ${removed} carts`})
+              }else if(power - neededPower >= 1 && (horses + rentHorses) != 0){// if horse(s) can be removed and still cover the power needed
+                  let removed  = power - neededPower
+                  res.status(400).send({message:`you can remove at least ${removed} horses`})
+              }else{// subtracting the used rent items as it is one-use only
+                  initial.inventory[type.asset] -= quantity
+                  final.inventory[type.asset] += quantity
+                  await inital.save()
+                  await final.save()
+                  pat.rentHorse -= rentHorses
+                  pat.rentCart -= rentCarts
+                  await pat.save()
+              }
+              }
+          }
+      }
+    }else{//if the user is not a CP he can't preform the action
         res.status(403).send(
             {
-                message:"must be a cp to enter"
+                message:"must be a CP to enter"
             }
         )
     }
+}else{// if the user is not logged in at all
+    res.status(401).send({message:"you must be logged in to perform the action"})
+}
 }
 
 
 
 
-module.exports = {buy}
+module.exports = {buy, transport}

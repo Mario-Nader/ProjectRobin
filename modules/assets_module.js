@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 
 const assetSchema = new mongoose.Schema({
 asset:{
-    type:string,
-    required:True,
+    type:String,
+    required:true,
 },
 cost:{
     type:Number,
-    required:True,
+    required:true,
 }
 }
 )

@@ -1,7 +1,16 @@
+const express = require('express')
+const router = express.Router()
+const scout_controller = require('../controllers/scout_controllers')
+const auth = require('../controllers/auth_controllers')
 
 
 
-async function view_scores(req,res){
-  let  patrols = await patrol.find({"name":{$ne:"kadr"}}).exec();
-  return patrols
-}
+
+
+
+
+
+
+
+
+module.exports = router

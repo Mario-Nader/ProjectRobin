@@ -6,7 +6,7 @@ require("dotenv").config();
 
 function createToken(id){
     return jwt.sign({id},process.env.secretTokenString,{
-        expiresIn: 24*60*60
+        expiresIn: 24*60*60*30
     })
 }
 
@@ -22,7 +22,7 @@ async function  signup(req,res){
             chef
         });
         token = createToken(scout._id);
-        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000});
+        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30});
         await scout.save();
         res.status(201).json({
             "success": true,
@@ -41,7 +41,7 @@ async function login(req,res){
         if(scout){
             if(name == scout.name){
                 token = createToken(scout._id)
-                res.cookie("token",token,{httpOnly:true,maxAge:24*60*60*1000})
+                res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000})
                 res.status(200).json({"success":true,"user":{"id": scout._id ,"username":scout.name}})
             }else{
                 res.status(400).json({"success":false,"msg":"the password is incorrect"});

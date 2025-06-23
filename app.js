@@ -16,5 +16,6 @@ app.use(express.json());
 app.use('/Chef',chefRoute)
 app.use('/CP',cpRoute)
 app.use('/Scout',scoutRoute)
+app.use('/authen',authRoute)
 
 

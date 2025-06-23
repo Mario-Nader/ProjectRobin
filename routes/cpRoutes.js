@@ -5,7 +5,7 @@ const auth = require('../controllers/auth_controllers')
 // ,auth.authenMid,auth.verifyUser,
 
 
-
+router.patch('/transport/process',auth.authenMid,auth.verifyUser,cp_controller.transport)
 
 
 

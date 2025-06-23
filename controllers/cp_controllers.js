@@ -1,5 +1,5 @@
-const Patrol = require("../modules/patrol_module")
 const lands = require("../modules/Land_module")
+const Patrol = require("../modules/patrol_module")
 const assets = require("../modules/assets_module")
 const scouts = require("../modules/scout_module")
 
@@ -221,11 +221,71 @@ async function twoLandsResources(req,res) {
   try{
   let starting = await singleLandResources(req.initialLandNo)
   let finishing = await singleLandResources(req.finalLandNo)
+  res.status(200).send({starting,finishing})
   }catch(err){
     console.log(err)
     res.status(500).send({message:"internal server error in the twoLandsResources"})
   }
 }
+async function getPlant(req,res){
+  try{
+  let land = await lands.findOne({land_no:req.landNo}).exec()
+  let landSoils = {
+    "empty":land.soils.empty,
+    "apple":land.soils.apple,
+    "watermelon":land.soils.watermelon,
+    "wheat":land.soils.wheat
+  }
+  let scout = await scouts.findById(req.id).exec()
+  let pat = await Patrol.findById(scout.patrol).exec()
+  let seeds = {
+    "apple":pat.appleSeeds,
+    "watermelon":pat.watermelonSeeds,
+    "wheat":pat.wheatSeeds
+  }
+  res.status(200).send({
+    "landSoil":landSoils,
+    "seeds":seeds
+  })
+}catch(err){
+  console.log(err)
+  res.status(500).send({message:"an error happened in getplant please try again later"})
+}
+
+}
+
+async function plant(req,res){
+  let landNo = req.landNo
+  let land = await lands.findOne({land_no : landNo}).exec()
+  let targetSoil = req.targetSoil
+  let targetSeed = req.targetSeed
+  let pat = await Patrol.findById(land.patrol_ID)
+  if(pat[targetseed] == 0){
+    res.status(400).send({message:"the patrol has no seeds of that kind"})
+  }else if(land.soils[targetSoil] == 0){
+    res.status(400).send({message:"the land doesn't have that kind of soil"})
+  }else{
+    pat[targetSeed] -= 1
+    land.soils[targetSoil] -= 1
+    if(targetSeed == "wheatSeed"){
+      land.soils.wheat += 1
+    }else if(targetSeed == "watermelonSeed"){
+      land.soils.watermelon += 1
+    }else if(targetSeed == "appleSeed"){
+      land.soils.apple += 1
+    }else{
+      res.status(400).send({message:"seed type is invalid"})
+    }
+    await pat.save()
+    await land.save()
+    res.status(200).send({message:"planting is done successfully"})
+    
+  }
+}
 
 
-module.exports = {buy, transport}
+async function viewMap(){
+  let landArr = await lands.find().exec()
+  return landArr;  
+}
+module.exports = {buy, transport,twoLandsResources,getPlant}

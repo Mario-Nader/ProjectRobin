@@ -4,11 +4,11 @@ const assets = require("../modules/assets_module")
 const scouts = require("../modules/scout_module")
 
 async function buy(req,res){//need to add comment here
-  let user = scout.findById(req.id);//grab the user by the ID
+  let user = scouts.findById(req.id);//grab the user by the ID
   if(user.cp == true){//if the user is a cp he can buy items by using the patrols resources 
       let quantity = parseInt(req.quantity);//extracting the type and quantity from the request
       let type = await assets.find({asset:req.type}).exec();
-      let pat = await patrol.find({name:req.name}).exec();
+      let pat = await Patrol.find({name:req.name}).exec();
       if(!type){
         res.status(400).send({
           message:"this asset doesn't exist"
@@ -80,7 +80,7 @@ async function buy(req,res){//need to add comment here
           pat[item] = pat[item] + quantity  //incrementing the items
         }   
         pat.coins = pat.coins - (type.cost * quantity);
-        await land.save();
+        await lands.save();
         await pat.save();
         res.status(200).send({
           message:"purchase done successful"
@@ -251,41 +251,69 @@ async function getPlant(req,res){
   console.log(err)
   res.status(500).send({message:"an error happened in getplant please try again later"})
 }
+}
 
+
+function seedMap(seedName){
+  switch(seedName){
+    case "wheatSeeds":
+      return "wheat"
+    case "appleSeeds":
+      return "apple"
+    case "watermelonSeeds":
+      return "watermelon"
+    default:
+      return "invalid"
+  }
 }
 
 async function plant(req,res){
   let landNo = req.landNo
   let land = await lands.findOne({land_no : landNo}).exec()
   let targetSoil = req.targetSoil
-  let targetSeed = req.targetSeed
-  let pat = await Patrol.findById(land.patrol_ID)
+  let targetSeed = req.targetSeed//the target seed name will come in plural form in the request
+  let seedType = seedMap(targetSeed)
+  let pat = await Patrol.findById(land.patrol_ID).exec()
   if(pat[targetseed] == 0){
     res.status(400).send({message:"the patrol has no seeds of that kind"})
   }else if(land.soils[targetSoil] == 0){
     res.status(400).send({message:"the land doesn't have that kind of soil"})
+  }else if(seedType == targetSoil){
+    res.status(4000).send({message:"the soil is already of that kind"})
   }else{
-    pat[targetSeed] -= 1
-    land.soils[targetSoil] -= 1
-    if(targetSeed == "wheatSeed"){
-      land.soils.wheat += 1
-    }else if(targetSeed == "watermelonSeed"){
-      land.soils.watermelon += 1
-    }else if(targetSeed == "appleSeed"){
-      land.soils.apple += 1
+    if(seedType == "invalid"){
+      res.status(400).send({message:"the seed type is invalid"})
     }else{
-      res.status(400).send({message:"seed type is invalid"})
-    }
-    await pat.save()
-    await land.save()
-    res.status(200).send({message:"planting is done successfully"})
-    
+      pat[targetSeed] -= 1
+      land.soils[targetSoil] -= 1
+      pat.soils[targetSoil] -= 1
+      land.soils[seedType] += 1
+      pat.soils[seedType] += 1
+      await pat.save()
+      await land.save()
+      res.status(200).send({message:"planting is done successfully"})
+      }
   }
 }
 
+async function watering(res,req){//watering may end up in the chef controllers
+  let patrol = await Patrol.findOne({name:req.patrol}).exec()
+  let watering = await assets.findOne({asset:"farming"}).exec()
+  if(patrol.farming){
+    res.status(400).send({message:"the patrol already watered it's plants"})
+  }else if(patrol.coins < watering.cost){
+    res.status(400).send({message:"the patrol doesn't have enough money for watering their plants"})
+  }
+  else{
+    patrol.farming = true
+    patrol.coins -= watering.cost
+    await patrol.save()
+    res.status(200).sebd({message:"the plants were watered successfully"})
+  }
+}
 
 async function viewMap(){
   let landArr = await lands.find().exec()
   return landArr;  
 }
-module.exports = {buy, transport,twoLandsResources,getPlant}
+module.exports = {buy, transport,twoLandsResources,getPlant,plant}

@@ -83,7 +83,7 @@ patrolSchema = mongoose.Schema({
         required: true
     },
     farming:{
-        type:Number,
+        type:Boolean,
         required: true
     }
 });

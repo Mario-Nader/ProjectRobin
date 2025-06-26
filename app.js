@@ -1,5 +1,6 @@
 const cookieParser = require('cookie-parser');
 const express = require('express');
+const cors = require("cors")
 const app = express();
 const port = 3000;
 const {connectDB} = require('./DB.js');
@@ -17,5 +18,8 @@ app.use('/Chef',chefRoute)
 app.use('/CP',cpRoute)
 app.use('/Scout',scoutRoute)
 app.use('/authen',authRoute)
-
+app.use(cors({
+  origin:'http://localhost:5173',
+  credentials:true
+}))
 

@@ -39,15 +39,27 @@ async function login(req,res){
     try{
         const scout = await scouts.findOne({name : name});
         if(scout){
-            if(name == scout.name){
-                token = createToken(scout._id)
-                res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000})
-                res.status(200).json({"success":true,"user":{"id": scout._id ,"username":scout.name}})
-            }else{
-                res.status(400).json({"success":false,"msg":"the password is incorrect"});
-            }
+                if(scout.password == password){
+                    let rank = 0
+                    if(scout.cp == true){
+                        rank = 2
+                    }else{
+                        let patrol = await Patrols.findById(scout.patrol).exec()
+                        if(patrol.name == "kadr"){
+                            rank = 3
+                        }else{
+                            rank = 1
+                        }
+                    }
+                    token = createToken(scout._id)
+                    res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000})
+                    res.status(200).json({"success":true,"user":{"username":scout.name,"rank":rank}})
+                }
+                else{
+                    res.status(400).json({"success":false,"msg":"the password is incorrect"});
+                }
         }else{
-            res.status(400).json({"success":false,"msg":"the email not registred please create an accound first"})
+            res.status(400).json({"success":false,"msg":"the user is not registred please create an accound first"})
         }
     }catch(err){
         console.log(err);

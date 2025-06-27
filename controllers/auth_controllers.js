@@ -111,7 +111,7 @@ async function verifyUser(req,res,next){
             }
         })
     }
-    const scout = await scouts.findById(id);
+    const scout = await Scout.findById(id);
     if(!scout){
         res.status(404).json({"msg":"user not found"})
     }else{

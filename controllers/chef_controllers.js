@@ -9,42 +9,29 @@ async function view_scores(req,res){
   return patrols
 }
 
-// async function update_scores(req,res){
-//   let user = scout.findById(req.id);
-//   let Chefpat = patrol.findById(user.patrol)
-//   if(Chefpat.name == "kadr"){
-//     //num->incrementation or decrementation amound where the decremntation is presented as a negative amount
-//     //pat_name is the name of the patrol to extract the patrol from the database
-//     let num = req.num;
-//     let pat_name = req.patrol;
-//     let pat = await Patrol.find({name:pat_name}).exec()
-//     //updating the coin amount of the patrol and saving the new coin amount
-//     pat.coins = pat.coins + num;
-//     await pat.save();
-//   }else{//the user is not a chef therfore don't have the premession to preforme such process
-//     res.status(401).send({
-//       message:"unauthorized access"
-//     })
-//   }
-// }
-
-// async function update_scores(req,res){
-//   let user = await Scout.findById(req.id).exec()
-//   if((await Patrol.findById(user.patrol).exec()).name == "kadr"){
-//     let pats = await Patrol.find({},{_id:0,name:1,coins:1}).exec()
-//     let patrols = Object.keys(req.body)
-//     let scores = Object.values(req.body)
-//     patrols.forEach((element,index,arr) => {
-
-//     })
-//   }else{
-//     return res.status(401).send({"must be a chef to update score"})
-//   }
-// }
+async function update_scores(req,res){
+  let user = await Scout.findById(req.id).exec()
+  if(user){
+  if((await Patrol.findById(user.patrol).exec()).name == "kadr"){
+    let pats = await Patrol.find({name:{$ne :"kadr"}},{_id:0,name:1,coins:1}).exec()
+    let points = req.body
+    for(let pat in pats){
+      if(pats.hasOwnProperty(key)){
+        pat.coins += points[pat]//the requset contains the patrol names as written in the DB with their scores 
+      }
+    }
+    Promise.all(pats.map(pat =>pat.save()))
+  }else{
+    return res.status(401).send({message:"must be a chef to update score"})
+  }
+}else{
+  return res.status(403).send({message:"must be logged in to do this action"})
+}
+}
 
 async function getharvest(req,res){
   try{
-  let patrol = await Patrol.find({},{
+  let patrol = await Patrol.find({"name":{$ne:"kadr"}},{
     name:1,
     "soils.apple":1,
     "soils.watermelon":1,
@@ -101,8 +88,7 @@ async function watering(req,res){
 }
 }
 
-
-async function harvest() {
+async function harvest(req, res) {
   try{
   let farmings = await Patrol.find({name:{$ne : "kadr"}},{
     _id:1,
@@ -137,6 +123,4 @@ catch(err){
 }
 
 
-
-
-module.exports = {view_scores,getharvest,harvest,watering}
+module.exports = {view_scores,getharvest,harvest,watering,update_scores}

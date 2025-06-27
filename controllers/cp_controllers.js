@@ -1,13 +1,13 @@
-const lands = require("../modules/Land_module")
+const Land = require("../modules/Land_module")
 const Patrol = require("../modules/patrol_module")
-const assets = require("../modules/assets_module")
-const scouts = require("../modules/scout_module")
+const Asset = require("../modules/assets_module")
+const Scout = require("../modules/scout_module")
 
 async function buy(req,res){//need to add comment here
   let user = scouts.findById(req.id);//grab the user by the ID
   if(user.cp == true){//if the user is a cp he can buy items by using the patrols resources 
       let quantity = parseInt(req.quantity);//extracting the type and quantity from the request
-      let type = await assets.find({asset:req.type}).exec();
+      let type = await Asset.find({asset:req.type}).exec();
       let pat = await Patrol.find({name:req.name}).exec();
       if(!type){
         res.status(400).send({
@@ -22,7 +22,7 @@ async function buy(req,res){//need to add comment here
       if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
         let item = assetMap(type.asset)
         if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
-          let land = lands.findOne({land_no:req.landno})//the request will contain the land number
+          let land = Land.findOne({land_no:req.landno})//the request will contain the land number
           if(item == "tot_workshops"){
                 if(land.workshop == true){
                   res.status(400).send({
@@ -80,7 +80,7 @@ async function buy(req,res){//need to add comment here
           pat[item] = pat[item] + quantity  //incrementing the items
         }   
         pat.coins = pat.coins - (type.cost * quantity);
-        await lands.save();
+        await land.save();
         await pat.save();
         res.status(200).send({
           message:"purchase done successful"
@@ -117,15 +117,15 @@ function assetMap(name){//map the name in the assets with the names in the patro
 async function transport(req,res)
 {
     let id = req.id
-    let user = await scouts.findById(id).exec()
+    let user = await Scout.findById(id).exec()
 if(user){
     if(user.cp == true){//if the user is a cp he can preform the action
     let patrolName = req.patrol
     let pat = await Patrol.findOne({name:patrolName}).exec();
     let initialNo = req.intialLand
     let finalNo= req.finalLand
-    let initial = await lands.findOne({land_no : initialNo}).exec()
-    let final = await lands.findOne({land_no : finalNo}).exec()
+    let initial = await Land.findOne({land_no : initialNo}).exec()
+    let final = await Land.findOne({land_no : finalNo}).exec()
     if(initialNo == finalNo){//if both numbers are equal
       res.status(400).send({message:"both lands are the same land"})
     }else if(initial.patrol_ID != pat._id && final.patrol_ID != pat._id){//the two lands are not owned by the patrol
@@ -142,7 +142,7 @@ if(user){
           res.status(400).send({message:"patrol doesn't have the given number of means"})
       }else{
           let typeName = req.typeName
-          let type = await assets.findOne({asset : typeName}).exec()
+          let type = await Asset.findOne({asset : typeName}).exec()
           let quantity = req.quantity
           let horses = req.horses
           let rentHorses = req.rentHorses
@@ -179,7 +179,7 @@ if(user){
               }else{// subtracting the used rent items as it is one-use only
                   initial.inventory[type.asset] -= quantity
                   final.inventory[type.asset] += quantity
-                  await inital.save()
+                  await initial.save()
                   await final.save()
                   pat.rentHorse -= rentHorses
                   pat.rentCart -= rentCarts
@@ -203,7 +203,7 @@ if(user){
 
 async function singleLandResources(landNo){
   try{
-  let land = await lands.findOne({land_no:landNo}).exec()
+  let land = await Land.findOne({land_no:landNo}).exec()
   let landData = {
     "apple":land.inventory.apple,
     "watermelon":land.inventory.watermelon,
@@ -229,14 +229,14 @@ async function twoLandsResources(req,res) {
 }
 async function getPlant(req,res){
   try{
-  let land = await lands.findOne({land_no:req.landNo}).exec()
+  let land = await Land.findOne({land_no:req.landNo}).exec()
   let landSoils = {
     "empty":land.soils.empty,
     "apple":land.soils.apple,
     "watermelon":land.soils.watermelon,
     "wheat":land.soils.wheat
   }
-  let scout = await scouts.findById(req.id).exec()
+  let scout = await Scout.findById(req.id).exec()
   let pat = await Patrol.findById(scout.patrol).exec()
   let seeds = {
     "apple":pat.appleSeeds,
@@ -269,7 +269,7 @@ function seedMap(seedName){
 
 async function plant(req,res){
   let landNo = req.landNo
-  let land = await lands.findOne({land_no : landNo}).exec()
+  let land = await Land.findOne({land_no : landNo}).exec()
   let targetSoil = req.targetSoil
   let targetSeed = req.targetSeed//the target seed name will come in plural form in the request
   let seedType = seedMap(targetSeed)
@@ -298,7 +298,7 @@ async function plant(req,res){
 
 async function watering(res,req){//watering may end up in the chef controllers
   let patrol = await Patrol.findOne({name:req.patrol}).exec()
-  let watering = await assets.findOne({asset:"farming"}).exec()
+  let watering = await Asset.findOne({asset:"farming"}).exec()
   if(patrol.farming){
     res.status(400).send({message:"the patrol already watered it's plants"})
   }else if(patrol.coins < watering.cost){
@@ -313,7 +313,7 @@ async function watering(res,req){//watering may end up in the chef controllers
 }
 
 async function viewMap(){
-  let landArr = await lands.find().exec()
+  let landArr = await Land.find().exec()
   return landArr;  
 }
 module.exports = {buy, transport,twoLandsResources,getPlant,plant}

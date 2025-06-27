@@ -19,4 +19,4 @@ const ScoutsSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Scout',ScoutsSchema);
+module.exports = mongoose.model('Scout',ScoutsSchema,'scouts');

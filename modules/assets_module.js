@@ -11,3 +11,5 @@ cost:{
 }
 }
 )
+
+module.exports = mongoose.model('Asset',assetSchema);

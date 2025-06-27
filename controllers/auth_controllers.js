@@ -1,6 +1,6 @@
-const scouts = require('../modules/scout_module');
-const patrols = require('../modules/patrol_module')
-const bcrypt = require('bcrypt');
+const Scout = require('../modules/scout_module');
+const Patrol = require('../modules/patrol_module')
+// const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
@@ -11,40 +11,51 @@ function createToken(id){
 }
 
 async function  signup(req,res){
-    let {name,password,cp,patrol,chef} = req.body;
+    let {name,password,cp,patrol} = req.body;
     try{
-        let pat = await patrols.findOne({name:patrol})
-        const scout = new scouts({
+        let pat = await Patrol.findOne({name:patrol})
+        // console.log(pat.name)
+        if(!pat){
+            return res.status(400).send({message:"this patrol doesn't exist"})
+        }
+        const scout = new Scout({
             name,
             password,
             cp,
             "patrol":pat._id,
-            chef
         });
+        // console.log(scout.name)
         token = createToken(scout._id);
         res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30});
         await scout.save();
+        // console.log("the user is saved")
         res.status(201).json({
             "success": true,
             "message": "user registered successfully"
           });
     }catch(err){
-        console.log(err);
-        res.status(500).json({success:false,message:"couldn't create the user"});
+        console.log(err)
+        if(err.errorResponse.code == 11000){
+            return res.status(400).send({message:"this username is already registered"})
+        }else{
+        return res.status(500).json({success:false,message:"couldn't create the user"});
+        }
     }
 }
 
 async function login(req,res){
     let {name,password} = req.body;
+    // console.log("Request body:", req.body);
     try{
-        const scout = await scouts.findOne({name : name});
+const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec();
+console.log("Scout found:", scout);
         if(scout){
                 if(scout.password == password){
                     let rank = 0
                     if(scout.cp == true){
                         rank = 2
                     }else{
-                        let patrol = await Patrols.findById(scout.patrol).exec()
+                        let patrol = await Patrol.findById(scout.patrol).exec()
                         if(patrol.name == "kadr"){
                             rank = 3
                         }else{

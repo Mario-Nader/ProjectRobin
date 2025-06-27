@@ -1,10 +1,10 @@
-const patrol  = require('../modules/patrol_module')
-const land = require('../modules/Land_module')
+const Patrol  = require('../modules/patrol_module')
+const Land = require('../modules/Land_module')
 
 
 async function view_scores(req,res){
-  let  patrols = await patrol.find({"name":{$ne:"kadr"}}).exec();
-  let lands = await land.find().exec()
+  let  patrols = await Patrol.find({"name":{$ne:"kadr"}}).exec();
+  let lands = await Land.find().exec()
   res.status(200).send({"patrols":patrols,"lands":lands})
 }
 

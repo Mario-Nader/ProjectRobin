@@ -122,5 +122,216 @@ catch(err){
   }
 }
 
+async function give(req,res){
+  let {patrol,quantity,type,landNumber} = req.body
+  // let assetType = await Asset.findOne({asset:type}).exec()
+  //may be removed in the future and replaced by type for further optmization
+  let pat = await Patrol.findOne({name : patrol}).exec()
+  if(landNumber !== 0){ //if the asset is land specific
+  if(landNumber > 33 || landNumber < 1){
+    return res.status(400).send({message:"the land number is invalid",success:false})
+  }
+  let land = await Land.findOne({land_no : landNumber}).exec()
+  if(land.patrol_ID !== pat._id){
+    return res.status(400).send({
+      message:`this land doesn't belong to the ${pat.name}`
+      ,success:false
+    })
+  }
+  if(type === "soldier"){
+    land.soldiers += quantity
+    pat.tot_sol += quantity
+  }else{
+    land.inventory[type] += quantity
+    pat[type] += quantity
+  }
+  await land.save()
+}else{
+  pat[type] += quantity
+}
+await pat.save()
+return res.status(200).send({success:true})
+}
 
-module.exports = {view_scores,getharvest,harvest,watering,update_scores}
+
+
+async function take(req,res){//the patrol must have the land(must be handled)
+  let {patrol,quantity,type,landNumber} = req.body
+  // let assetType = await Asset.findOne({asset:type}).exec()//may be removed in the future and replaced by type for further optmization
+  let pat = await Patrol.findOne({name : patrol}).exec()
+  if(landNumber !== 0){ //if the asset is land specific
+  if(landNumber > 33 || landNumber < 1){
+    return res.status(400).send({message:"the land number is invalid",success:false})
+  }
+  let land = await Land.findOne({land_no : landNumber}).exec()
+  if(land.patrol_ID !== pat._id){
+    return res.status(400).send({
+      message:`this land doesn't belong to the ${pat.name}`,
+      success:false
+    })
+  }
+  if(type === "soldier"){
+    if(land.soldiers >= quantity){
+    land.soldiers -= quantity
+    pat.tot_sol -= quantity
+    }else{
+      return res.status(400).send({
+        message:`the ${pat.name} doesn't have this much resources`,success:false
+      })
+    }
+  }else{
+    if(land.inventory[type] >= quantity){
+    land.inventory[type] -= quantity
+    pat[type] -= quantity
+    }else{
+      return res.status(400).send({
+        message:`the ${pat.name} doesn't have this much resources`,
+        success:false
+      })
+    }
+  }
+  await land.save()
+}else{
+  pat[type] -= quantity
+}
+await pat.save()
+return res.status(200).send({success:true})
+}
+
+async function giveHelper(pat,quantity,type,land,landNumber){
+  //  let assetType = await Asset.findOne({asset:type}).exec()
+   //may be removed in the future and replaced by type for further optmization
+  // let pat = await Patrol.findOne({name : patrol}).exec()
+  if(landNumber !== 0){ //if the asset is land specific
+  // let land = await Land.findOne({land_no : landNumber}).exec()
+  if(land.patrol_ID !== pat._id){
+    throw {code:400,message:`the land doesn't belong to the ${pat.name}`}
+  }
+  if(type === "soldier"){
+    land.soldiers += quantity
+    pat.tot_sol += quantity
+  }else{
+    land.inventory[type] += quantity
+    pat[type] += quantity
+  }
+  // await land.save()
+}else{
+  pat[type] += quantity
+}
+// await pat.save()
+return {code:200 , message:"success"}
+} 
+
+async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insiede
+  // let assetType = await Asset.findOne({asset:type}).exec() testing the removal and replacing with type
+  //may be removed in the future and replaced by type for further optmization
+  if(landNumber !== 0){ //if the asset is land specific
+  if(land.patrol_ID !== pat._id){
+    throw {code:400, message:`this land doesn't belong to the ${pat.name}`}
+  }
+  if(type === "soldier"){
+    if(land.soldiers >= quantity){
+    land.soldiers -= quantity
+    pat.tot_sol -= quantity
+    }else{
+      throw {code:400, message:`the ${pat.name} doesn't have this much soldiers`}
+    }
+  }else{
+    if(land.inventory[type] >= quantity){
+    land.inventory[type] -= quantity
+    pat[type] -= quantity
+    }else{
+       throw {code:400, message:`the ${pat.name} doesn't have this much resources`}
+    }
+  }
+  // await land.save()
+}else{
+  pat[assetType.asset] -= quantity
+}
+// await pat.save()
+return
+}
+
+function between(upper , lower , number){
+  if(number >= lower && number <= upper){
+    return true
+  }else{
+    return false
+  }
+}
+
+async function trade(req,res){
+  let {patrol1,patorl2,quantity1,quantity2,type1,type2,SLand1,SLand2,DLand1,DLand2} = req.body
+  if(patrol1 === patorl2){
+    return res.status(400).send({message:"the two patrols are the same",success:false})
+  }
+  if(! between(33,1,SLand1) || ! between(33,1,SLand1) || ! between(33,1,SLand1) || ! between(33,1,SLand1) ){
+    return res.status(400).send({message:"A land number is not valid",success:false})
+  }else{
+    let tempLand
+    let srcLand1 //patrol 1 gives from
+    let srcLand2  // patrol 2 gives from
+    let distLand1  // patrol 1 receives in
+    let distLand2 // patrol 2 recieves in
+
+    if(SLand1 === DLand1 ){// to decrease the number of database times of access if possible
+      tempLand = await Land.findOne({land_no : SLand1})
+      srcLand1 = tempLand
+      distLand1 = tempLand
+    }else{
+      srcLand1 = await Land.findOne({land_no : SLand1}).exec()
+      distLand1 = await Land.findOne({land_no : DLand1}).exec() 
+    }
+
+    if(SLand2 === DLand2 ){// to decrease the number of database times of access if possible
+      tempLand = await Land.findOne({land_no : SLand2})
+      srcLand2 = tempLand
+      distLand2 = tempLand
+    }else{
+      srcLand2 = await Land.findOne({land_no : SLand2}).exec()
+      distLand2 = await Land.findOne({land_no : DLand2}).exec() 
+    }
+
+  let pat1 = await Patrol.findOne({name:patrol1}).exec()
+  let pat2 = await Patrol.findOne({name:patorl2}).exec()
+
+  //the fetching of the data into doc objects are done before calling the helpers not in them
+  //as the objects are passed by refrence so the functions would change the original document
+  // (pat,quantity,type,land,landNumber)
+  try{
+  await takeHelper(pat1,quantity1,type1,srcLand1,SLand1)
+  await takeHelper(pat2,quantity2,type2,srcLand2,SLand2)
+  await giveHelper(pat2,quantity1,type1,distLand2,DLand2)
+  await giveHelper(pat1,quantity2,type2,distLand1,DLand1)
+
+  if(SLand1 === DLand1){
+    await srcLand1.save()
+  }else{
+    await srcLand1.save()
+    await distLand1.save()
+  }
+  if(SLand2 === DLand2){
+    await srcLand2.save()
+  }else{
+    await srcLand2.save()
+    await distLand2.save()
+  }
+  await pat1.save()
+  await pat2.save()
+  return res.status(200).send({message :"trade successfully",success:true})
+  }catch(err){
+    console.log(err)
+    return res.status(err.code).send({
+      message:err.message,
+      success:false
+    })
+  }
+
+  }
+}
+
+
+
+
+
+module.exports = {view_scores,getharvest,harvest,watering,update_scores,give,take,trade}

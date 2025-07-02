@@ -97,7 +97,6 @@ async function buy(req,res){//need to add comment here
   }
 }
 
-
 //must do a function that return all the costs on the get method on the /buy route
 function assetMap(name){//map the name in the assets with the names in the patrol module the work with the buy function
  switch(name) {
@@ -115,6 +114,7 @@ function assetMap(name){//map the name in the assets with the names in the patro
     return name
 }
 }
+
 //process
 async function transport(req,res)
 {
@@ -229,6 +229,7 @@ async function twoLandsResources(req,res) {
     return res.status(500).send({message:"internal server error in the twoLandsResources"})
   }
 }
+
 async function getPlant(req,res){
   try{
   let land = await Land.findOne({land_no:req.landNo}).exec()
@@ -297,6 +298,10 @@ async function plant(req,res){
   }
 }
 
+async function postPlant(req,res){//check if the patrol have the land and redirect to the plant/process
+
+}
+
 async function watering(res,req){//watering may end up in the chef controllers
   let patrol = await Patrol.findOne({name:req.patrol}).exec()
   let watering = await Asset.findOne({asset:"farming"}).exec()
@@ -317,4 +322,11 @@ async function viewMap(){
   let landArr = await Land.find().exec()
   return landArr;  
 }
+
+async function attack(res,req){
+  
+}
+
+
+
 module.exports = {buy, transport,twoLandsResources,getPlant,plant,watering}

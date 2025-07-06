@@ -84,7 +84,7 @@ function authenMid(req,res,next){
         jwt.verify(token,process.env.secretTokenString,(err,decodedToken)=>{
             if(err){
                 console.log(err.message);
-                res.status(400).json({"msg":"you must be loged in to enter this page"})
+                return res.status(400).json({"msg":"you must be loged in to enter this page"})
             }else{
                 next()
             }
@@ -92,7 +92,7 @@ function authenMid(req,res,next){
         
     }else{
         console.log(err.message);
-        res.status(400).json({"msg":"you must be loged in to enter this page"})
+        return res.status(400).json({"msg":"you must be loged in to enter this page"})
     }
 }
 
@@ -100,12 +100,12 @@ async function verifyUser(req,res,next){
     token = req.cookies.token;
     let id = 0;
     if(!token){
-        res.status(401).json({"msg":"unauthorized access"});
+       return res.status(401).json({"msg":"unauthorized access"});
     }else{
         jwt.verify(token,process.env.secretTokenString,(err,decodedToken)=>{
             if(err){
                 console.log(err.message);
-                res.status(401).json({"msg":"unauthorized access"});
+                return res.status(401).json({"msg":"unauthorized access"});
             }else{
                  id = decodedToken.id;
             }
@@ -113,7 +113,7 @@ async function verifyUser(req,res,next){
     }
     const scout = await Scout.findById(id);
     if(!scout){
-        res.status(404).json({"msg":"user not found"})
+       return res.status(404).json({"msg":"user not found"})
     }else{
         req.id = id;
         next();
@@ -131,6 +131,25 @@ function logout(req,res){
         console.log(err);
     }
 }
-// router.post('/signout',)
 
-module.exports = {signup,login,authenMid,verifyUser,logout}
+async function CPvalidation(req,res,next){
+    let user = await Scout.findOne({_id : req.id}).exec()
+    if(user.cp){
+        next()
+    }else{
+        return res.status(403).send({message:"must be a cp to enter"})
+    }
+}
+
+async function chefValidation (req,res,next){
+    let user = await Scout.findOne({_id : req.id}).exec()
+    let pat = await Scout.findOne({_id: user.patrol}).exec()
+    if(pat.name === "kadr"){
+        next()
+    }else{
+        return res.status(403).send({message:"must be a chef to enter"})
+    }
+}
+
+
+module.exports = {signup,login,authenMid,verifyUser,logout,CPvalidation,chefValidation}

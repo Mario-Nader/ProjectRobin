@@ -85,6 +85,13 @@ patrolSchema = mongoose.Schema({
     farming:{
         type:Boolean,
         required: true
+    },
+    currentGDP:{
+        type:Number,
+        require:true
+    },fed:{
+        type:Number,
+        required : true
     }
 });
 

@@ -81,6 +81,9 @@ const landSchema = new mongoose.Schema({
       type:Number,
       required:true
     }
+  },fed:{
+    type:Number,
+    required : true
   }
 });
 

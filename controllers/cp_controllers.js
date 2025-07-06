@@ -4,97 +4,93 @@ const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
 async function buy(req,res){//need to add comment here
-  let user = scouts.findById(req.id);//grab the user by the ID
-  if(user.cp == true){//if the user is a cp he can buy items by using the patrols resources 
-      let quantity = parseInt(req.quantity);//extracting the type and quantity from the request
-      let type = await Asset.find({asset:req.type}).exec();
-      let pat = await Patrol.find({name:req.name}).exec();
-      if(!type){
-        res.status(400).send({
-          message:"this asset doesn't exist"
-        })
-      }
-      if(!pat){
-        res.status(400).send({
-          message:"this patrol doesn't exist"
-        })
-      }
-      if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
-        let item = assetMap(type.asset)
-        if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
-          let land = Land.findOne({land_no:req.landno})//the request will contain the land number
-          if(item == "tot_workshops"){
-                if(land.workshop == true){
-                  res.status(400).send({
-                    message:"the land has already a workshop"
-                  })
+  let user = await Scout.findById(req.id).exec();//grab the user by the ID
+  // //if the user is a cp he can buy items by using the patrols resources 
+    let quantity = parseInt(req.quantity);//extracting the type and quantity from the request
+    let type = await Asset.find({asset:req.type}).exec();
+    let pat = await Patrol.findOne({_id : user.patrol}).exec();
+    if(!type){
+      res.status(400).send({
+        message:"this asset doesn't exist"
+      })
+    }
+    if(!pat){
+      res.status(400).send({
+        message:"this patrol doesn't exist"
+      })
+    }
+    if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
+      let item = assetMap(type.asset)
+      if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
+        let land = Land.findOne({land_no:req.landno})//the request will contain the land number
+        if(item == "tot_workshops"){
+              if(land.workshop == true){
+                res.status(400).send({
+                  message:"the land has already a workshop"
+                })
+              }else{
+                if(quantity != 1){
+                  res.status(400).send({message:"you can't buy more than one workshop in one land"})
                 }else{
-                  if(quantity != 1){
-                    res.status(400).send({message:"you can't buy more than one workshop in one land"})
-                  }else{
-                    land.workshop = true;
-                    pat.tot_workshops = pat.tot_workshops + 1
-                  }
+                  land.workshop = true;
+                  pat.tot_workshops = pat.tot_workshops + 1
                 }
-          }else if(item == "tot_sol"){
-                 land.soldiers = land.soldiers + quantity;
-                 pat.tot_sol = pat.tot_sol + 1;
-          }else if(item == "tot_houses"){// may need to change to make the chef controll the adding of houses not the cp
-                  if(land.houses < 3){
-                    land.houses = land.houses + quantity;
-                    pat.tot_houses = pat.tot_houses + quantity;
-                  }else{
+              }
+        }else if(item == "tot_sol"){
+                land.soldiers = land.soldiers + quantity;
+                pat.tot_sol = pat.tot_sol + 1;
+        }else if(item == "tot_houses"){// may need to change to make the chef controll the adding of houses not the cp
+                if(land.houses < 3){
+                  land.houses = land.houses + quantity;
+                  pat.tot_houses = pat.tot_houses + quantity;
+                }else{
+                  res.status(400).send({
+                    message:"the houses are already maximum on this land"
+                  })
+                }
+              }
+        else if(item == "watermelon"){
+                land.inventory.watermelon = land.inventory.watermelon + quantity;
+                pat.watermelon += quantity;
+        }else if(item == "wheat"){
+                land.inventory.wheat = land.inventory.wheat + quantity;
+                pat.wheat+=quantity;
+        }else if (item == "apple"){
+                land.inventory.apple = land.inventory.apple + quantity;
+                pat.apple += quantity
+        }else if(item == "soil"){
+          if(land.soil_no < 5){
+                  if(land.soil_no + quantity > 5){
                     res.status(400).send({
-                      message:"the houses are already maximum on this land"
+                      message: "the quantity is more than the allowed limit of soils in one land"
                     })
-                  }
-                }
-          else if(item == "watermelon"){
-                  land.inventory.watermelon = land.inventory.watermelon + quantity;
-                  pat.watermelon += quantity;
-          }else if(item == "wheat"){
-                  land.inventory.wheat = land.inventory.wheat + quantity;
-                  pat.wheat+=quantity;
-          }else if (item == "apple"){
-                  land.inventory.apple = land.inventory.apple + quantity;
-                  pat.apple += quantity
-          }else if(item == "soil"){
-            if(land.soil_no < 5){
-                    if(land.soil_no + quantity > 5){
-                      res.status(400).send({
-                        message: "the quantity is more than the allowed limit of soils in one land"
-                      })
-                    }else{
-                      land.soil_no = land.soil_no + quantity;
-                      land.crops.empty = land.crops.empty + quantity 
-                      pat.tot_soil += quantity
-                      pat.soils.empty += quantity
-                    }
                   }else{
-                    res.status(400).send({
-                      message:"the soil limit in this land was reached"
-                    })
+                    land.soil_no = land.soil_no + quantity;
+                    land.crops.empty = land.crops.empty + quantity 
+                    pat.tot_soil += quantity
+                    pat.soils.empty += quantity
                   }
+                }else{
+                  res.status(400).send({
+                    message:"the soil limit in this land was reached"
+                  })
                 }
-        }else{
-          pat[item] = pat[item] + quantity  //incrementing the items
-        }   
-        pat.coins = pat.coins - (type.cost * quantity);
-        await land.save();
-        await pat.save();
-        res.status(200).send({
-          message:"purchase done successful"
-        })
-      }else{//if the balance in not sufficient
-        res.status(401).send({
-          message:"no enough coins"
-        })
-      }
-  }else{
-        res.status(401).send({
-          message:"unautherized access"
-        })
-  }
+              }
+      }else{
+        pat[item] = pat[item] + quantity  //incrementing the items
+      }   
+      pat.coins = pat.coins - (type.cost * quantity);
+      await land.save();
+      await pat.save();
+      res.status(200).send({
+        message:"purchase done successful"
+      })
+    }else{//if the balance in not sufficient
+      res.status(401).send({
+        message:"no enough coins"
+      })
+    }
+ 
 }
 
 //must do a function that return all the costs on the get method on the /buy route
@@ -119,9 +115,8 @@ function assetMap(name){//map the name in the assets with the names in the patro
 async function transport(req,res)
 {
     let id = req.id
-    let user = await Scout.findById(id).exec()
-if(user){
-    if(user.cp == true){//if the user is a cp he can preform the action
+    // let user = await Scout.findById(id).exec()
+    //if the user is a cp he can preform the action
     let patrolName = req.patrol
     let pat = await Patrol.findOne({name:patrolName}).exec();
     let initialNo = req.intialLand
@@ -134,7 +129,7 @@ if(user){
           res.status(400).send({
               message:"the patrol doesn't own both lands"
           })
-      }else if(intial.patrol_ID != pat._id){//the inital land only is not owned by the patrol
+      }else if(initial.patrol_ID != pat._id){//the inital land only is not owned by the patrol
           res.status(400),send({
               message:"the patrol doesn't own the inital land"
           })
@@ -150,12 +145,14 @@ if(user){
           let rentHorses = req.rentHorses
           let carts = req.carts
           let rentCarts = req.rentCarts
+          let neededPower
+          let power
           if(type.asset == "soldier"){
               if(initial.soldiers <= quantity){//the land doesn't have enough soldiers to send and keep at least one soldier in the land
                   res.status(400).send({message:"the inital land doesn't have enough resources"})
               }else{// calculating the needed power for soldiers
-                  let neededPower = quantity
-                  let power = horses + rentHorses + (carts * 5)  +  (rentCarts * 5)
+                   neededPower = quantity
+                   power = horses + rentHorses + (carts * 5)  +  (rentCarts * 5)
               }
               if(neededPower > power){//if the trasportation means don't cover the needed power
                 res.status(400).send({message:"the transportation power is not enough"})
@@ -166,8 +163,8 @@ if(user){
                       message:"the intial land doesn't have enough resources"
                   })
               }else{//calculating needed and provided power to trasnport (wheat / apple / watermelon)
-                  let neededPower = quantity
-                  let power = horses + rentHorses + (carts * 3)  +  (rentCarts * 3)
+                   neededPower = quantity
+                   power = horses + rentHorses + (carts * 3)  +  (rentCarts * 3)
               }
               if(neededPower > power){//if the trasportation means don't cover the needed power
                 res.status(400).send({message:"the transportation power is not enough"})
@@ -191,16 +188,8 @@ if(user){
               }
           }
       }
-    }else{//if the user is not a CP he can't preform the action
-        res.status(403).send(
-            {
-                message:"must be a CP to enter"
-            }
-        )
-    }
-}else{// if the user is not logged in at all
-    res.status(401).send({message:"you must be logged in to perform the action"})
-}
+    
+
 }
 
 async function singleLandResources(landNo){
@@ -302,7 +291,7 @@ async function postPlant(req,res){//check if the patrol have the land and redire
 
 }
 
-async function watering(res,req){//watering may end up in the chef controllers
+async function watering(req,res){//watering may end up in the chef controllers
   let patrol = await Patrol.findOne({name:req.patrol}).exec()
   let watering = await Asset.findOne({asset:"farming"}).exec()
   if(patrol.farming){
@@ -327,6 +316,76 @@ async function attack(res,req){
   
 }
 
+async function feeding(req,res){
+  let {numberOfHouses,landNo,watermelon,apple,wheat} = req.body
+  let land = await Land.findOne({land_no : landNo}).exec()
+  let user = await Scout.findOne({_id : req.id}).exec()
+  let patrol = await Patrol.findOne({_id : user.patrol}).exec()
+  if(land.patrol_ID !== patrol._id){
+    return res.status(400).send({message : "this patrol doesn't own this land"})
+  }
+  if(numberOfHouses > land.houses || numberOfHouses < 0 || numberOfHouses > (land.houses - land.fed)){
+    return res.status(400).send({message:"invalid number of houses"})
+  } 
+  let unfed = land.houses - land.fed
+  if(unfed === 0){
+    return res.status(400).send({
+      message:"the land is already fed"
+    })
+  }
+  let neededFood = unfed * 5
+  let food = (watermelon * 4) + (wheat) + (apple * 2)
+  if(neededFood > food){
+    return res.satus(400).send({message:"not enough food"})
+  }
+  if(land.inventory.apple < apple || land.inventory.wheat < wheat || land.inventory.watermelon < watermelon){
+    return res.status(400).send({message:"you don't have enough resources in this land"})
+  }
+  let exceeded = {
+    watermelons:0,
+    apples:0,
+    wheats:0
+  }
+  if(neededFood < food){
+    if(food - neededFood > 4 && watermelon > 0){
+      ex = parseInt(food - neededFood / 4)
+      if (watermelon >= ex){
+        exceeded.watermelons = ex
+      }else{
+        exceeded.watermelons = watermelon
+      }
+      food -= exceeded.watermelons * 5
+    }
+    if(food - neededFood > 2 && apple > 0){
+      ex = parseInt(food - neededFood / 2)
+      if (apple >= ex){
+        exceeded.apples = ex
+      }else{
+        exceeded.apples = apple
+      }
+      food -= exceeded.apples * 2
+    }
+    if(food - neededFood > 1 && wheat > 0){
+      ex = parseInt(food - neededFood)
+      if (wheat >= ex){
+        exceeded.wheats = ex
+      }else{
+        exceeded.wheats = wheat
+      }
+      food -= exceeded.wheats
+    }
+    return res.status(400).send({message:"you could remove all of these crops","exceeded":exceeded})
+  }else{
+    land.fed += numberOfHouses
+    patrol.fed += numberOfHouses
+    await land.save()
+    await patrol.save()
+    return res.status(200).send({message:"feeding done successfully"})
+  }
+
+  
+}
 
 
-module.exports = {buy, transport,twoLandsResources,getPlant,plant,watering}
+
+module.exports = {buy, transport,twoLandsResources,getPlant,plant,watering,feeding}

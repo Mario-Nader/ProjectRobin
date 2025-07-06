@@ -14,6 +14,6 @@ router.patch('/give',chef_controller.give)
 router.patch('/take',chef_controller.take)
 router.get('/gdp',chef_controller.getGDP)
 router.patch('/gdp',chef_controller.addGDP)
-
+router.patch('/attackConditions',chef_controller.attackCondition)
 
 module.exports = router

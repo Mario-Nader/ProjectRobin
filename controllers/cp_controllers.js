@@ -312,8 +312,10 @@ async function viewMap(){
   return landArr;  
 }
 
-async function attack(res,req){
-  
+async function attack(req,res){
+  let intialLand = await Land.findOne({land_no : req.inital}).exec()
+  let attackedLand = await Land.findOne({land_no : req.attacked}).exec()
+  let
 }
 
 async function feeding(req,res){
@@ -388,4 +390,5 @@ async function feeding(req,res){
 
 
 
-module.exports = {buy, transport,twoLandsResources,getPlant,plant,watering,feeding}
+
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding}

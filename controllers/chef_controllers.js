@@ -361,6 +361,18 @@ async function addGDP(req,res){
 }
 }
 
+async function attackCondition(req,res){
+  try{
+    let {soldiers,houses,lands,coins,inLandSoldiers,landNo} = req.body
+    let land = await Land.findOne({land_no : landNo}).exec()
+    land.conditions = {soldiers,houses,lands,coins,inLandSoldiers}
+    await land.save()
+    return res.status(200).send({message:"the conditions were set successfully"})
+  }catch(err){
+    console.log(err.message)
+    return res.status(500).send({message:"error in the attack condtitions functions"})
+  }
 
+}
 
-module.exports = {view_scores,getharvest,harvest,watering,update_scores,give,take,trade,getGDP,addGDP}
+module.exports = {view_scores,getharvest,harvest,watering,update_scores,give,take,trade,getGDP,addGDP,attackCondition}

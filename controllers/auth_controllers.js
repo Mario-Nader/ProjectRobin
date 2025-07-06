@@ -4,8 +4,8 @@ const Patrol = require('../modules/patrol_module')
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
 
-function createToken(id){
-    return jwt.sign({id},process.env.secretTokenString,{
+function createToken(id,patrol){
+    return jwt.sign({id,patrol},process.env.secretTokenString,{
         expiresIn: 24*60*60*30
     })
 }
@@ -25,7 +25,7 @@ async function  signup(req,res){
             "patrol":pat._id,
         });
         // console.log(scout.name)
-        token = createToken(scout._id);
+        token = createToken(scout._id,pat.name);
         res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30});
         await scout.save();
         // console.log("the user is saved")
@@ -62,7 +62,8 @@ console.log("Scout found:", scout);
                             rank = 1
                         }
                     }
-                    token = createToken(scout._id)
+                    let {patrol} = await Patrol.findOne({_id : scout.patrol}, {_id : 0 , name : 1}) 
+                    token = createToken(scout._id ,patrol)
                     res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000})
                     res.status(200).json({"success":true,"user":{"username":scout.name,"rank":rank}})
                 }
@@ -83,7 +84,6 @@ function authenMid(req,res,next){
     if(token){
         jwt.verify(token,process.env.secretTokenString,(err,decodedToken)=>{
             if(err){
-                console.log(err.message);
                 return res.status(400).json({"msg":"you must be loged in to enter this page"})
             }else{
                 next()
@@ -99,6 +99,7 @@ function authenMid(req,res,next){
 async function verifyUser(req,res,next){
     token = req.cookies.token;
     let id = 0;
+    let patrol
     if(!token){
        return res.status(401).json({"msg":"unauthorized access"});
     }else{
@@ -108,6 +109,7 @@ async function verifyUser(req,res,next){
                 return res.status(401).json({"msg":"unauthorized access"});
             }else{
                  id = decodedToken.id;
+                 patrol = decodedToken.patrol
             }
         })
     }
@@ -116,6 +118,7 @@ async function verifyUser(req,res,next){
        return res.status(404).json({"msg":"user not found"})
     }else{
         req.id = id;
+        req.patrol = patrol;
         next();
     }
 }

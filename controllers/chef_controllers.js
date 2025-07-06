@@ -330,8 +330,37 @@ async function trade(req,res){
   }
 }
 
+async function getGDP(req,res){
+  try{
+  let patrols = await Patrol.find({name : {$ne : "kadr"}}, {_id: 1 , fed : 1 , name:1}).exec()
+  patrols.forEach((element,index,arr) => {
+    element.gdp = element.fed * 25 //as every house contribute by 25 coins in case it was fed
+  })
+ let pats = patrols.reduce((acc,curr)=> {
+  acc[curr.name] = curr.gdp
+  return acc
+  },{})
+  return res.status(200).send({message:"GDP data is fetched successfully","patrols" : pats})
+}catch(err){
+  console.log(err.message)
+  return res.status(500).send({message:"error happened in the getGDP"})
+}
+}
+
+async function addGDP(req,res){
+  try{
+    let patrols = await Patrol.find({name : {$ne : "kadr"}}, {_id: 1 , fed : 1 , name:1,coins:1}).exec()
+    patrols.forEach((element)=>{
+      element.coins += element.fed * 25
+      element.fed = 0
+    })
+    await Promise.all(patrols.map( (patrol)=> patrol.save()))// six patrols don't need batching technique but if for some reason more patrols were to be added batching technique will be needed
+    return res.status(200).send({message:"the GDP was added successfully"})
+}catch(err){
+    return res.status(500).send({message:"error in the addGDP function"})
+}
+}
 
 
 
-
-module.exports = {view_scores,getharvest,harvest,watering,update_scores,give,take,trade}
+module.exports = {view_scores,getharvest,harvest,watering,update_scores,give,take,trade,getGDP,addGDP}

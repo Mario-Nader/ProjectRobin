@@ -12,6 +12,8 @@ router.patch('/update-scores',chef_controller.update_scores)
 router.patch('/trade/process',chef_controller.trade)
 router.patch('/give',chef_controller.give)
 router.patch('/take',chef_controller.take)
-// router.get('/gdp',chef_controller.calcGDP)//to do
-// router.patch('/gdp',chef_controller.claimGDP)//to do
+router.get('/gdp',chef_controller.getGDP)
+router.patch('/gdp',chef_controller.addGDP)
+
+
 module.exports = router

@@ -13,7 +13,7 @@ router.get('/plant',cp_controller.getPlant)
 router.patch('/plant/process',cp_controller.plant)
 router.patch('/transport/process',cp_controller.transport)
 router.patch('/watering',cp_controller.watering)
-//feeding 
+router.patch('/feeding',cp_controller.feeding)
 //attack
 
 

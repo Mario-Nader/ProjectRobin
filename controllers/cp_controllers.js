@@ -313,9 +313,62 @@ async function viewMap(){
 }
 
 async function attack(req,res){
-  let intialLand = await Land.findOne({land_no : req.inital}).exec()
+  try{
+    // let {initial,attacked,initalPatrol,}
+  let initialLand = await Land.findOne({land_no : req.initial}).exec()
   let attackedLand = await Land.findOne({land_no : req.attacked}).exec()
-  let
+  let initialPat = await Patrol.findOne({name:req.initialPat}).exec()
+  let attackedPat = await Patrol.findOne({name:req.attackedPat}).exec()
+  if(req.patrol !== initalPat.name){
+    return res.status(400).send({message:"you don't belong to this patrol"})
+  }else if(initialPat._id !== initialLand.patrol_ID){
+    return res.status(400).send({message:"the patrol doesn't own this land"})
+  }else if(initialLand.soldiers - attackedLand.soldiers < 2){
+    return res.status(400).send({message:"not enough soldiers to attack"})
+  }else{
+    let soldiers = initialLand.soldiers
+    soldiers -= attackedLand.soldiers
+    attackedPat.tot_sol -= attackedLand.soldiers
+    initialPat.tot_sol -= attackedLand.soldiers
+    if(soldiers % 2 == 0){
+      initialLand.soldiers = soldiers / 2
+      attackedLand.soldiers = soldiers / 2
+    }else{
+      initialLand.soldiers = Math.floor(soldiers / 2) + 1
+      attackedLand.soldiers = Math.floor(soldiers / 2)
+    }
+    attackedLand.patrol_ID = initalPat._id
+    attackedPat.tot_lands -= 1
+    initialPat.tot_lands += 1
+    attackedPat.tot_soil -= attackedLand.soil_no
+    initialPat.tot_soil += attackedLand.soil_no
+    attackedPat.tot_houses -= attackedLand.houses
+    initialPat.tot_houses += attackedLand.houses
+    if(attackedLand.workshop){
+      initialPat.tot_workshops += 1
+      attackedPat.tot_workshops -= 1
+    }
+    initialPat.wheat += attackedLand.inventory.wheat
+    initialPat.apple += attackedLand.inventory.apple
+    initialPat.watermelon += attackedLand.inventory.watermelon
+    attackedPat.wheat -= attackedLand.inventory.wheat
+    attackedPat.apple -= attackedLand.inventory.apple
+    attackedPat.watermelon -= attackedLand.inventory.watermelon
+    initialPat.soils.apple += attackedLand.soils.apple
+    initialPat.soils.wheat += attackedLand.soils.wheat
+    initialPat.soils.watermelon += attackedLand.soils.watermelon
+    initialPat.soils.empty += attackedLand.soils.empty
+    attackedPat.soils.apple -= attackedLand.soils.apple
+    attackedPat.soils.wheat -= attackedLand.soils.wheat
+    attackedPat.soils.watermelon -= attackedLand.soils.watermelon
+    attackedPat.soils.empty -= attackedLand.soils.empty
+    initialPat.fed += attackedLand.fed
+    attackedPat.fed -= attackedLand.fed
+  }
+}catch(err){
+  console.log(err)
+  return res.status(500).send({message:"error in the attack function"})
+}
 }
 
 async function feeding(req,res){

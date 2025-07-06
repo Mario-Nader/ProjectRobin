@@ -9,6 +9,7 @@ async function view_scores(req,res){
   return patrols
 }
 
+
 async function update_scores(req,res){
   let user = await Scout.findById(req.id).exec()
   if(user){
@@ -28,6 +29,7 @@ async function update_scores(req,res){
   return res.status(403).send({message:"must be logged in to do this action"})
 }
 }
+
 
 async function getharvest(req,res){
   try{
@@ -62,6 +64,7 @@ async function getharvest(req,res){
 }
 }
 
+
 async function watering(req,res){
   let id = req.id
   let chef = await Scout.findById(id).exec()
@@ -87,6 +90,7 @@ async function watering(req,res){
   return res.status(400).send({message:"this patrol doesn't exist"})
 }
 }
+
 
 async function harvest(req, res) {
   try{
@@ -122,6 +126,7 @@ catch(err){
   }
 }
 
+
 async function give(req,res){
   let {patrol,quantity,type,landNumber} = req.body
   // let assetType = await Asset.findOne({asset:type}).exec()
@@ -152,7 +157,6 @@ async function give(req,res){
 await pat.save()
 return res.status(200).send({success:true})
 }
-
 
 
 async function take(req,res){//the patrol must have the land(must be handled)
@@ -198,6 +202,7 @@ await pat.save()
 return res.status(200).send({success:true})
 }
 
+
 async function giveHelper(pat,quantity,type,land,landNumber){
   //  let assetType = await Asset.findOne({asset:type}).exec()
    //may be removed in the future and replaced by type for further optmization
@@ -221,6 +226,7 @@ async function giveHelper(pat,quantity,type,land,landNumber){
 // await pat.save()
 return {code:200 , message:"success"}
 } 
+
 
 async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insiede
   // let assetType = await Asset.findOne({asset:type}).exec() testing the removal and replacing with type
@@ -252,6 +258,7 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
 return
 }
 
+
 function between(upper , lower , number){
   if(number >= lower && number <= upper){
     return true
@@ -259,6 +266,7 @@ function between(upper , lower , number){
     return false
   }
 }
+
 
 async function trade(req,res){
   let {patrol1,patorl2,quantity1,quantity2,type1,type2,SLand1,SLand2,DLand1,DLand2} = req.body
@@ -330,6 +338,7 @@ async function trade(req,res){
   }
 }
 
+
 async function getGDP(req,res){
   try{
   let patrols = await Patrol.find({name : {$ne : "kadr"}}, {_id: 1 , fed : 1 , name:1}).exec()
@@ -347,6 +356,7 @@ async function getGDP(req,res){
 }
 }
 
+
 async function addGDP(req,res){
   try{
     let patrols = await Patrol.find({name : {$ne : "kadr"}}, {_id: 1 , fed : 1 , name:1,coins:1}).exec()
@@ -361,9 +371,13 @@ async function addGDP(req,res){
 }
 }
 
+
 async function attackCondition(req,res){
   try{
     let {soldiers,houses,lands,coins,inLandSoldiers,landNo} = req.body
+    if(landNo < 1 || landNo > 33 || landNo === undefined){
+      return res.status(400).send({message:"invalid landNO"})
+    }
     let land = await Land.findOne({land_no : landNo}).exec()
     land.conditions = {soldiers,houses,lands,coins,inLandSoldiers}
     await land.save()
@@ -374,5 +388,6 @@ async function attackCondition(req,res){
   }
 
 }
+
 
 module.exports = {view_scores,getharvest,harvest,watering,update_scores,give,take,trade,getGDP,addGDP,attackCondition}

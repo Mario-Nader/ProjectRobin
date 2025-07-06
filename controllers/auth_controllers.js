@@ -145,13 +145,20 @@ async function CPvalidation(req,res,next){
 }
 
 async function chefValidation (req,res,next){
+    try{
     let user = await Scout.findOne({_id : req.id}).exec()
-    let pat = await Scout.findOne({_id: user.patrol}).exec()
+    let pat = await Patrol.findOne({_id: user.patrol}).exec()
+    if(!user || ! pat){
+        return res.status(400).send({message:"error in retreaving the patrol or user in chef validation"})
+    }
     if(pat.name === "kadr"){
-        next()
+        return next()
     }else{
         return res.status(403).send({message:"must be a chef to enter"})
     }
+}catch(err){
+    return res.status(500).send({message:"error in chef validation function"})
+}
 }
 
 

@@ -14,14 +14,15 @@ async function update_scores(req,res){
   let user = await Scout.findById(req.id).exec()
   if(user){
   if((await Patrol.findById(user.patrol).exec()).name == "kadr"){
-    let pats = await Patrol.find({name:{$ne :"kadr"}},{_id:0,name:1,coins:1}).exec()
+    let pats = await Patrol.find({name:{$ne :"kadr"}},{_id:1,name:1,coins:1}).exec()
     let points = req.body
-    for(let pat in pats){
-      if(pats.hasOwnProperty(key)){
-        pat.coins += points[pat]//the requset contains the patrol names as written in the DB with their scores 
+    for (let pat of pats) {
+      if (points.hasOwnProperty(pat.name)) {
+        pat.coins += points[pat.name]; // safely add points
       }
     }
-    Promise.all(pats.map(pat =>pat.save()))
+    await Promise.all(pats.map(pat =>pat.save()))
+    return res.status(200).send({message:"the scores were updated successfully"})
   }else{
     return res.status(401).send({message:"must be a chef to update score"})
   }

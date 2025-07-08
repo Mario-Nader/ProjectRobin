@@ -62,8 +62,8 @@ console.log("Scout found:", scout);
                             rank = 1
                         }
                     }
-                    let {patrol} = await Patrol.findOne({_id : scout.patrol}, {_id : 0 , name : 1}) 
-                    token = createToken(scout._id ,patrol)
+                    let pat = await Patrol.findOne({_id : scout.patrol}) 
+                    token = createToken(scout._id ,pat.name)
                     res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000})
                     res.status(200).json({"success":true,"user":{"username":scout.name,"rank":rank}})
                 }

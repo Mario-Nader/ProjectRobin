@@ -93,6 +93,7 @@ async function buy(req,res){//need to add comment here
  
 }
 
+
 //must do a function that return all the costs on the get method on the /buy route
 function assetMap(name){//map the name in the assets with the names in the patrol module the work with the buy function
  switch(name) {
@@ -114,7 +115,7 @@ function assetMap(name){//map the name in the assets with the names in the patro
 //process
 async function transport(req,res)
 {
-    let id = req.id
+    // let id = req.id
     // let user = await Scout.findById(id).exec()
     //if the user is a cp he can preform the action
     let patrolName = req.patrol
@@ -192,6 +193,8 @@ async function transport(req,res)
 
 }
 
+
+
 async function singleLandResources(landNo){
   try{
   let land = await Land.findOne({land_no:landNo}).exec()
@@ -208,6 +211,8 @@ async function singleLandResources(landNo){
 
 }
 
+
+
 async function twoLandsResources(req,res) {
   try{
   let starting = await singleLandResources(req.initialLandNo)
@@ -218,6 +223,8 @@ async function twoLandsResources(req,res) {
     return res.status(500).send({message:"internal server error in the twoLandsResources"})
   }
 }
+
+
 
 async function getPlant(req,res){
   try{
@@ -245,6 +252,8 @@ async function getPlant(req,res){
 }
 }
 
+
+
 function seedMap(seedName){
   switch(seedName){
     case "wheatSeeds":
@@ -257,6 +266,8 @@ function seedMap(seedName){
       return "invalid"
   }
 }
+
+
 
 async function plant(req,res){
   let landNo = req.landNo
@@ -287,9 +298,13 @@ async function plant(req,res){
   }
 }
 
+
+
 async function postPlant(req,res){//check if the patrol have the land and redirect to the plant/process
 
 }
+
+
 
 async function watering(req,res){//watering may end up in the chef controllers
   let patrol = await Patrol.findOne({name:req.patrol}).exec()
@@ -307,19 +322,39 @@ async function watering(req,res){//watering may end up in the chef controllers
   }
 }
 
+
+
 async function viewMap(){
   let landArr = await Land.find().exec()
   return landArr;  
 }
 
+async function getAttackKadr(req,res){
+  let patName = req.patrol
+  let patrol = await Patrol.findOne({name : patName}).exec()
+  let land = await Land.findOne({land_no : req.landNo}).exec()
+  
+
+}
+
+async function attackKadr(req,res){
+
+}
+
+
 async function attack(req,res){
   try{
-    // let {initial,attacked,initalPatrol,}
-  let initialLand = await Land.findOne({land_no : req.initial}).exec()
-  let attackedLand = await Land.findOne({land_no : req.attacked}).exec()
-  let initialPat = await Patrol.findOne({name:req.initialPat}).exec()
-  let attackedPat = await Patrol.findOne({name:req.attackedPat}).exec()
-  if(req.patrol !== initalPat.name){
+  let {initialL,attackedL,initalPatrol,attackedPatrol} = req.body
+  let initialLand = await Land.findOne({land_no : initialL}).exec()
+  let attackedLand = await Land.findOne({land_no : attackedL}).exec()
+  let initialPat = await Patrol.findOne({name:initalPatrol}).exec()
+  let attackedPat = await Patrol.findOne({name:attackedPatrol}).exec()
+  let adjacent = initialLand.adjacent
+  let adj = adjacent.some(element => element === attackedLand.land_no)
+  if(!adj){
+    return res.status(400).send({message:"the two lands are not adjacent"})
+  }
+  if(req.patrol !== initialPat.name){
     return res.status(400).send({message:"you don't belong to this patrol"})
   }else if(initialPat._id !== initialLand.patrol_ID){
     return res.status(400).send({message:"the patrol doesn't own this land"})
@@ -337,7 +372,7 @@ async function attack(req,res){
       initialLand.soldiers = Math.floor(soldiers / 2) + 1
       attackedLand.soldiers = Math.floor(soldiers / 2)
     }
-    attackedLand.patrol_ID = initalPat._id
+    attackedLand.patrol_ID = initialPat._id
     attackedPat.tot_lands -= 1
     initialPat.tot_lands += 1
     attackedPat.tot_soil -= attackedLand.soil_no
@@ -364,12 +399,19 @@ async function attack(req,res){
     attackedPat.soils.empty -= attackedLand.soils.empty
     initialPat.fed += attackedLand.fed
     attackedPat.fed -= attackedLand.fed
+    await attackedLand.save()
+    await attackedPat.save()
+    await initialLand.save()
+    await initialPat.save()
+    return res.status(200).send({message:"the attack was done successfully"})
   }
 }catch(err){
   console.log(err)
   return res.status(500).send({message:"error in the attack function"})
 }
 }
+
+
 
 async function feeding(req,res){
   let {numberOfHouses,landNo,watermelon,apple,wheat} = req.body
@@ -443,5 +485,4 @@ async function feeding(req,res){
 
 
 
-
-module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding}
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr}

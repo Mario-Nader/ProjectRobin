@@ -14,6 +14,7 @@ router.patch('/plant/process',cp_controller.plant)
 router.patch('/transport/process',cp_controller.transport)
 router.patch('/watering',cp_controller.watering)
 router.patch('/feeding',cp_controller.feeding)
+router.get('/kadrAttack',cp_controller.getAttackKadr)
 //attack
 
 

@@ -91,7 +91,6 @@ function authenMid(req,res,next){
         })
         
     }else{
-        console.log(err.message);
         return res.status(400).json({"msg":"you must be loged in to enter this page"})
     }
 }

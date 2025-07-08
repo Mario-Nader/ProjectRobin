@@ -253,7 +253,7 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
   }
   // await land.save()
 }else{
-  pat[assetType.asset] -= quantity
+  pat[type] -= quantity
 }
 // await pat.save()
 return

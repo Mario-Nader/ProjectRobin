@@ -283,22 +283,28 @@ async function trade(req,res){
     let distLand1  // patrol 1 receives in
     let distLand2 // patrol 2 recieves in
 
-    if(SLand1 === DLand1 ){// to decrease the number of database times of access if possible
+    if(SLand1 === DLand1 && SLand1 !== 0 ){// to decrease the number of database times of access if possible
       tempLand = await Land.findOne({land_no : SLand1})
       srcLand1 = tempLand
       distLand1 = tempLand
     }else{
+      if(SLand1 !== 0){
       srcLand1 = await Land.findOne({land_no : SLand1}).exec()
+    }if(DLand1 !== 0){
       distLand1 = await Land.findOne({land_no : DLand1}).exec() 
     }
+    }
 
-    if(SLand2 === DLand2 ){// to decrease the number of database times of access if possible
+    if(SLand2 === DLand2 && SLand2 !== 0){// to decrease the number of database times of access if possible
       tempLand = await Land.findOne({land_no : SLand2})
       srcLand2 = tempLand
       distLand2 = tempLand
     }else{
+      if(SLand2 !== 0){
       srcLand2 = await Land.findOne({land_no : SLand2}).exec()
+      }if(DLand2 !== 0){
       distLand2 = await Land.findOne({land_no : DLand2}).exec() 
+      }
     }
 
   let pat1 = await Patrol.findOne({name:patrol1}).exec()
@@ -313,17 +319,23 @@ async function trade(req,res){
   await giveHelper(pat2,quantity1,type1,distLand2,DLand2)
   await giveHelper(pat1,quantity2,type2,distLand1,DLand1)
 
-  if(SLand1 === DLand1){
+  if(SLand1 === DLand1 && SLand1 !== 0){
     await srcLand1.save()
   }else{
+    if(SLand1 !== 0){
     await srcLand1.save()
+    }if(DLand1 !== 0){
     await distLand1.save()
+    }
   }
-  if(SLand2 === DLand2){
+  if(SLand2 === DLand2 && SLand2 !== 0){
     await srcLand2.save()
   }else{
+    if(SLand2 !== 0){
     await srcLand2.save()
+    }if(DLand2 !== 0){
     await distLand2.save()
+    }
   }
   await pat1.save()
   await pat2.save()

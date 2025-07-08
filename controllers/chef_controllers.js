@@ -274,7 +274,7 @@ async function trade(req,res){
   if(patrol1 === patorl2){
     return res.status(400).send({message:"the two patrols are the same",success:false})
   }
-  if(! between(33,1,SLand1) || ! between(33,1,SLand1) || ! between(33,1,SLand1) || ! between(33,1,SLand1) ){
+  if(! between(33,0,SLand1) || ! between(33,0,SLand1) || ! between(33,0,SLand1) || ! between(33,0,SLand1) ){
     return res.status(400).send({message:"A land number is not valid",success:false})
   }else{
     let tempLand

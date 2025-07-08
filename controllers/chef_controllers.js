@@ -4,6 +4,9 @@ const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
 
+//land doesn't belong to the patrol in give , trad , take 
+
+
 async function view_scores(req,res){
   let  patrols = await Patrol.find({"name":{$ne:"kadr"}}).exec();
   return patrols
@@ -138,7 +141,7 @@ async function give(req,res){
     return res.status(400).send({message:"the land number is invalid",success:false})
   }
   let land = await Land.findOne({land_no : landNumber}).exec()
-  if(land.patrol_ID !== pat._id){
+  if(! land.patrol_ID.equals(pat._id)){
     return res.status(400).send({
       message:`this land doesn't belong to the ${pat.name}`
       ,success:false
@@ -169,7 +172,7 @@ async function take(req,res){//the patrol must have the land(must be handled)
     return res.status(400).send({message:"the land number is invalid",success:false})
   }
   let land = await Land.findOne({land_no : landNumber}).exec()
-  if(land.patrol_ID !== pat._id){
+  if(! land.patrol_ID.equals(pat._id)){
     return res.status(400).send({
       message:`this land doesn't belong to the ${pat.name}`,
       success:false
@@ -210,7 +213,7 @@ async function giveHelper(pat,quantity,type,land,landNumber){
   // let pat = await Patrol.findOne({name : patrol}).exec()
   if(landNumber !== 0){ //if the asset is land specific
   // let land = await Land.findOne({land_no : landNumber}).exec()
-  if(land.patrol_ID !== pat._id){
+  if(! land.patrol_ID.equals(pat._id)){
     throw {code:400,message:`the land doesn't belong to the ${pat.name}`}
   }
   if(type === "soldier"){
@@ -233,7 +236,9 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
   // let assetType = await Asset.findOne({asset:type}).exec() testing the removal and replacing with type
   //may be removed in the future and replaced by type for further optmization
   if(landNumber !== 0){ //if the asset is land specific
-  if(land.patrol_ID !== pat._id){
+  if(! land.patrol_ID.equals(pat._id)){
+    console.log(land.patrol_ID)
+    console.log(pat._id)
     throw {code:400, message:`this land doesn't belong to the ${pat.name}`}
   }
   if(type === "soldier"){

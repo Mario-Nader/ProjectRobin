@@ -81,7 +81,7 @@ async function watering(req,res){
     return res.status(400).send({message:"this patrol has already watered their plants"})
   }else{
     patrol.farming = true
-    await Patrol.save()
+    await patrol.save()
     return res.status(200).send({message:"the plants were watered successfully"})
   }
 }else{
@@ -104,7 +104,7 @@ async function harvest(req, res) {
     acc[pat._id] = pat.farming
     return acc
   },{})
-  let landArr  = await Land.find({patrol_ID : {$ne : kadrID}})//reduce the number of lands by excluding the leaders' lands
+  let landArr  = await Land.find({patrol_ID : {$ne : kadrID._id}})//reduce the number of lands by excluding the leaders' lands
   landArr.forEach((element)=>{
     if(pats[element.patrol_ID]){
       element.inventory.apple += element.soils.apple
@@ -113,7 +113,7 @@ async function harvest(req, res) {
     }
   })
   let chuncksize = 10 //this is chunck size saves to reduce the risk of overloading the connections with the databases
-  for(let i = 0; i < landArr.length(); i += chuncksize){
+  for(let i = 0; i < landArr.length; i += chuncksize){
     let chunck = landArr.slice(i , i + chuncksize)
     await Promise.all(chunck.map(land => land.save()))
   }
@@ -274,7 +274,7 @@ async function trade(req,res){
   if(patrol1 === patorl2){
     return res.status(400).send({message:"the two patrols are the same",success:false})
   }
-  if(! between(33,0,SLand1) || ! between(33,0,SLand1) || ! between(33,0,SLand1) || ! between(33,0,SLand1) ){
+  if(! between(33,0,SLand1) || ! between(33,0,DLand1) || ! between(33,0,DLand2) || ! between(33,0,SLand2) ){
     return res.status(400).send({message:"A land number is not valid",success:false})
   }else{
     let tempLand

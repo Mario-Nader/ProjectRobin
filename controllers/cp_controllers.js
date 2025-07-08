@@ -126,15 +126,15 @@ async function transport(req,res)
     let final = await Land.findOne({land_no : finalNo}).exec()
     if(initialNo == finalNo){//if both numbers are equal
       res.status(400).send({message:"both lands are the same land"})
-    }else if(initial.patrol_ID != pat._id && final.patrol_ID != pat._id){//the two lands are not owned by the patrol
+    }else if( ! initial.patrol_ID.equals(pat._id) && ! final.patrol_ID.equals(pat._id)){//the two lands are not owned by the patrol
           res.status(400).send({
               message:"the patrol doesn't own both lands"
           })
-      }else if(initial.patrol_ID != pat._id){//the inital land only is not owned by the patrol
+      }else if(! initial.patrol_ID.equals(pat._id)){//the inital land only is not owned by the patrol
           res.status(400),send({
               message:"the patrol doesn't own the inital land"
           })
-      }else if(final.patrol_ID != pat._id){//the final land is not owned by the patrol
+      }else if(! final.patrol_ID.equals(pat._id)){//the final land is not owned by the patrol
           res.status(400).send({message:"the patrol doesn't own the final land"})
       }else if(pat.tot_horses < horses || pat.tot_carts < carts || pat.rentCart < rentCarts || pat.rentHorse < rentHorses){//the patrol doesn't have the required means
           res.status(400).send({message:"patrol doesn't have the given number of means"})
@@ -330,14 +330,28 @@ async function viewMap(){
 }
 
 async function getAttackKadr(req,res){
+  try{
   let patName = req.patrol
   let patrol = await Patrol.findOne({name : patName}).exec()
   let land = await Land.findOne({land_no : req.landNo}).exec()
   let conditions = land.conditions
+  let qualifications = {}
+  qualifications.soldiers = patrol.tot_sol
+  qualifications.apple = patrol.apple
+  qualifications.wheat = patrol.wheat
+  qualifications.watermelon = patrol.watermelon
+  qualifications.soil = patrol.tot_soil
+  qualifications.houses = patrol.tot_houses
+  return res.status(200).send({"conditions":conditions ,"qualifications":qualifications})
+  }catch(err){
+    console.log(err.message)
+    return res.status(500).send({message:"error in getAttackKadr functions"})
+  }
 }
 
 async function attackKadr(req,res){
-
+  let land = await Land.findOne({land_no : req.landNo}).exec()
+  
 }
 
 
@@ -355,7 +369,7 @@ async function attack(req,res){
   }
   if(req.patrol !== initialPat.name){
     return res.status(400).send({message:"you don't belong to this patrol"})
-  }else if(initialPat._id !== initialLand.patrol_ID){
+  }else if(! initialPat._id.equals(initialLand.patrol_ID)){
     return res.status(400).send({message:"the patrol doesn't own this land"})
   }else if(initialLand.soldiers - attackedLand.soldiers < 2){
     return res.status(400).send({message:"not enough soldiers to attack"})
@@ -417,7 +431,7 @@ async function feeding(req,res){
   let land = await Land.findOne({land_no : landNo}).exec()
   let user = await Scout.findOne({_id : req.id}).exec()
   let patrol = await Patrol.findOne({_id : user.patrol}).exec()
-  if(land.patrol_ID !== patrol._id){
+  if(! land.patrol_ID.equals(patrol._id)){
     return res.status(400).send({message : "this patrol doesn't own this land"})
   }
   if(numberOfHouses > land.houses || numberOfHouses < 0 || numberOfHouses > (land.houses - land.fed)){

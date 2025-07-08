@@ -270,8 +270,8 @@ function between(upper , lower , number){
 
 
 async function trade(req,res){
-  let {patrol1,patorl2,quantity1,quantity2,type1,type2,SLand1,SLand2,DLand1,DLand2} = req.body
-  if(patrol1 === patorl2){
+  let {patrol1,patrol2,quantity1,quantity2,type1,type2,SLand1,SLand2,DLand1,DLand2} = req.body
+  if(patrol1 === patrol2){
     return res.status(400).send({message:"the two patrols are the same",success:false})
   }
   if(! between(33,0,SLand1) || ! between(33,0,DLand1) || ! between(33,0,DLand2) || ! between(33,0,SLand2) ){
@@ -302,7 +302,7 @@ async function trade(req,res){
     }
 
   let pat1 = await Patrol.findOne({name:patrol1}).exec()
-  let pat2 = await Patrol.findOne({name:patorl2}).exec()
+  let pat2 = await Patrol.findOne({name:patrol2}).exec()
 
   //the fetching of the data into doc objects are done before calling the helpers not in them
   //as the objects are passed by refrence so the functions would change the original document

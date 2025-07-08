@@ -333,8 +333,7 @@ async function getAttackKadr(req,res){
   let patName = req.patrol
   let patrol = await Patrol.findOne({name : patName}).exec()
   let land = await Land.findOne({land_no : req.landNo}).exec()
-  
-
+  let conditions = land.conditions
 }
 
 async function attackKadr(req,res){

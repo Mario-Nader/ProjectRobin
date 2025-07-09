@@ -3,7 +3,8 @@ const Patrol = require("../modules/patrol_module")
 const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
-async function buy(req,res){//need to add comment here
+async function buy(req,res){
+  console.log(req.body.landNo)//need to add comment here
   let user = await Scout.findById(req.id).exec();//grab the user by the ID
   // //if the user is a cp he can buy items by using the patrols resources 
     let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request

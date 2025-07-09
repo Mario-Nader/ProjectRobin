@@ -6,8 +6,8 @@ const Scout = require("../modules/scout_module")
 async function buy(req,res){//need to add comment here
   let user = await Scout.findById(req.id).exec();//grab the user by the ID
   // //if the user is a cp he can buy items by using the patrols resources 
-    let quantity = parseInt(req.quantity);//extracting the type and quantity from the request
-    let type = await Asset.find({asset:req.type}).exec();
+    let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request
+    let type = await Asset.find({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
     if(!type){
       res.status(400).send({
@@ -22,7 +22,7 @@ async function buy(req,res){//need to add comment here
     if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
       let item = assetMap(type.asset)
       if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
-        let land = Land.findOne({land_no:req.landno})//the request will contain the land number
+        let land = Land.findOne({land_no:req.body.landno})//the request will contain the land number
         if(item == "tot_workshops"){
               if(land.workshop == true){
                 res.status(400).send({
@@ -120,8 +120,8 @@ async function transport(req,res)
     //if the user is a cp he can preform the action
     let patrolName = req.patrol
     let pat = await Patrol.findOne({name:patrolName}).exec();
-    let initialNo = req.intialLand
-    let finalNo= req.finalLand
+    let initialNo = req.body.intialLand
+    let finalNo= req.body.finalLand
     let initial = await Land.findOne({land_no : initialNo}).exec()
     let final = await Land.findOne({land_no : finalNo}).exec()
     if(initialNo == finalNo){//if both numbers are equal
@@ -139,13 +139,13 @@ async function transport(req,res)
       }else if(pat.tot_horses < horses || pat.tot_carts < carts || pat.rentCart < rentCarts || pat.rentHorse < rentHorses){//the patrol doesn't have the required means
           res.status(400).send({message:"patrol doesn't have the given number of means"})
       }else{
-          let typeName = req.typeName
+          let typeName = req.body.typeName
           let type = await Asset.findOne({asset : typeName}).exec()
-          let quantity = req.quantity
-          let horses = req.horses
-          let rentHorses = req.rentHorses
-          let carts = req.carts
-          let rentCarts = req.rentCarts
+          let quantity = req.body.quantity
+          let horses = req.body.horses
+          let rentHorses = req.body.rentHorses
+          let carts = req.body.carts
+          let rentCarts = req.body.rentCarts
           let neededPower
           let power
           if(type.asset == "soldier"){
@@ -215,8 +215,8 @@ async function singleLandResources(landNo){
 
 async function twoLandsResources(req,res) {
   try{
-  let starting = await singleLandResources(req.initialLandNo)
-  let finishing = await singleLandResources(req.finalLandNo)
+  let starting = await singleLandResources(req.body.initialLandNo)
+  let finishing = await singleLandResources(req.body.finalLandNo)
   return res.status(200).send({starting,finishing})
   }catch(err){
     console.log(err)
@@ -228,7 +228,7 @@ async function twoLandsResources(req,res) {
 
 async function getPlant(req,res){
   try{
-  let land = await Land.findOne({land_no:req.landNo}).exec()
+  let land = await Land.findOne({land_no:req.body.landNo}).exec()
   let landSoils = {
     "empty":land.soils.empty,
     "apple":land.soils.apple,
@@ -270,18 +270,19 @@ function seedMap(seedName){
 
 
 async function plant(req,res){
-  let landNo = req.landNo
-  let land = await Land.findOne({land_no : landNo}).exec()
-  let targetSoil = req.targetSoil
-  let targetSeed = req.targetSeed//the target seed name will come in plural form in the request
+  let landnum = req.body.landNo
+  let land = await Land.findOne({land_no : landnum}).exec()
+  let targetSoil = req.body.targetSoil
+  let targetSeed = req.body.targetSeed//the target seed name will come in plural form in the request
   let seedType = seedMap(targetSeed)
-  let pat = await Patrol.findById(land.patrol_ID).exec()
-  if(pat[targetseed] == 0){
-    res.status(400).send({message:"the patrol has no seeds of that kind"})
+  let pat = await Patrol.findOne({name : req.patrol}).exec()
+  console.log(req.patrol)
+  if(pat[targetSeed] == 0){
+    return res.status(400).send({message:"the patrol has no seeds of that kind"})
   }else if(land.soils[targetSoil] == 0){
-    res.status(400).send({message:"the land doesn't have that kind of soil"})
+    return res.status(400).send({message:"the land doesn't have that kind of soil"})
   }else if(seedType == targetSoil){
-    res.status(4000).send({message:"the soil is already of that kind"})
+   return res.status(4000).send({message:"the soil is already of that kind"})
   }else{
     if(seedType == "invalid"){
       res.status(400).send({message:"the seed type is invalid"})
@@ -293,16 +294,13 @@ async function plant(req,res){
       pat.soils[seedType] += 1
       await pat.save()
       await land.save()
-      res.status(200).send({message:"planting is done successfully"})
+      return res.status(200).send({message:"planting is done successfully"})
       }
   }
 }
 
 
 
-async function postPlant(req,res){//check if the patrol have the land and redirect to the plant/process
-
-}
 
 
 
@@ -333,7 +331,7 @@ async function getAttackKadr(req,res){
   try{
   let patName = req.patrol
   let patrol = await Patrol.findOne({name : patName}).exec()
-  let land = await Land.findOne({land_no : req.landNo}).exec()
+  let land = await Land.findOne({land_no : req.body.landNo}).exec()
   let conditions = land.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
@@ -350,7 +348,7 @@ async function getAttackKadr(req,res){
 }
 
 async function attackKadr(req,res){
-  let land = await Land.findOne({land_no : req.landNo}).exec()
+  let land = await Land.findOne({land_no : req.body.landNo}).exec()
   
 }
 

@@ -147,14 +147,17 @@ function assetMap(name){//map the name in the assets with the names in the patro
 //process
 async function transport(req,res)
 {
+  try{
     // let id = req.id
     // let user = await Scout.findById(id).exec()
     //if the user is a cp he can preform the action
     let patrolName = req.patrol
     let pat = await Patrol.findOne({name:patrolName}).exec();
     let initialNo = req.body.intialLand
+    console.log(initialNo)
     let finalNo= req.body.finalLand
     let initial = await Land.findOne({land_no : initialNo}).exec()
+    console.log(initial)
     let final = await Land.findOne({land_no : finalNo}).exec()
     if(initialNo == finalNo){//if both numbers are equal
       res.status(400).send({message:"both lands are the same land"})
@@ -168,8 +171,6 @@ async function transport(req,res)
           })
       }else if(! final.patrol_ID.equals(pat._id)){//the final land is not owned by the patrol
           res.status(400).send({message:"the patrol doesn't own the final land"})
-      }else if(pat.tot_horses < horses || pat.tot_carts < carts || pat.rentCart < rentCarts || pat.rentHorse < rentHorses){//the patrol doesn't have the required means
-          res.status(400).send({message:"patrol doesn't have the given number of means"})
       }else{
           let typeName = req.body.typeName
           let type = await Asset.findOne({asset : typeName}).exec()
@@ -180,6 +181,9 @@ async function transport(req,res)
           let rentCarts = req.body.rentCarts
           let neededPower
           let power
+          if(pat.tot_horses < horses || pat.tot_carts < carts || pat.rentCart < rentCarts || pat.rentHorse < rentHorses){//the patrol doesn't have the required means
+          return res.status(400).send({message:"patrol doesn't have the given number of means"})
+        }
           if(type.asset == "soldier"){
               if(initial.soldiers <= quantity){//the land doesn't have enough soldiers to send and keep at least one soldier in the land
                   res.status(400).send({message:"the inital land doesn't have enough resources"})
@@ -221,7 +225,10 @@ async function transport(req,res)
               }
           }
       }
-    
+  }catch(err){
+    console.log(err)
+    return res.status(500).send({message:"error in transport"})
+  }
 
 }
 

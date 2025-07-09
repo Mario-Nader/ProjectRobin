@@ -9,13 +9,14 @@ async function buy(req,res){//need to add comment here
     let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request
     let type = await Asset.findOne({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
+    let land
     if(!type){
       return res.status(400).send({
         message:"this asset doesn't exist"
       })
     }
     if(!pat){
-      res.status(400).send({
+      return res.status(400).send({
         message:"this patrol doesn't exist"
       })
     }
@@ -23,7 +24,7 @@ async function buy(req,res){//need to add comment here
     if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
       let item = assetMap(type.asset)
       if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
-        let land = await Land.findOne({land_no:req.body.landno})//the request will contain the land number
+        land = await Land.findOne({land_no:req.body.landno})//the request will contain the land number
         if(item == "tot_workshops"){
               if(land.workshop == true){
                 res.status(400).send({
@@ -501,7 +502,7 @@ async function feeding(req,res){
   let neededFood = unfed * 5
   let food = (watermelon * 4) + (wheat) + (apple * 2)
   if(neededFood > food){
-    return res.satus(400).send({message:"not enough food"})
+    return res.status(400).send({message:"not enough food"})
   }
   if(land.inventory.apple < apple || land.inventory.wheat < wheat || land.inventory.watermelon < watermelon){
     return res.status(400).send({message:"you don't have enough resources in this land"})
@@ -512,6 +513,7 @@ async function feeding(req,res){
     wheats:0
   }
   if(neededFood < food){
+    let ex = 0;
     if(food - neededFood > 4 && watermelon > 0){
       ex = parseInt(food - neededFood / 4)
       if (watermelon >= ex){

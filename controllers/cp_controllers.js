@@ -34,6 +34,9 @@ async function buy(req,res){//need to add comment here
         if(landNumber == 0){
           return res.status(400).send({message:"you need land number to purchase this item"})
         }
+        if(!land.patrol_ID.equals(pat.id)){
+          return res.status(400).send({message:"this patrol doesn't own this land"})
+        }
         if(item == "tot_workshops"){
               if(land.workshop == true){
                 res.status(400).send({

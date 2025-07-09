@@ -9,7 +9,7 @@ router.patch('/transport/process',cp_controller.transport)
 
 router.get('/transport',cp_controller.twoLandsResources)
 router.patch('/buy',cp_controller.buy)
-router.get('/plant',cp_controller.getPlant)
+router.post('/plant',cp_controller.getPlant)
 router.patch('/plant/process',cp_controller.plant)
 router.patch('/transport/process',cp_controller.transport)
 router.patch('/watering',cp_controller.watering)

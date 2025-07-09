@@ -10,7 +10,7 @@ async function buy(req,res){//need to add comment here
     let type = await Asset.findOne({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
     if (req.body.landNo !== 0){
-    var land = await Land.findOne({land_no:req.body.landno})//the request will contain the land number
+    var land = await Land.findOne({land_no:req.body.landNo})//the request will contain the land number
     }
     if(!type){
       return res.status(400).send({

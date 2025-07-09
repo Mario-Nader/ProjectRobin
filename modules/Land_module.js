@@ -80,6 +80,18 @@ const landSchema = new mongoose.Schema({
     "inLandSoldiers":{
       type:Number,
       required:true
+    },
+    "apples":{
+      type: Number,
+      required :true
+    },
+    "wheats":{
+      type: Number,
+      required :true
+    },
+    "watermelons":{
+      type: Number,
+      required :true
     }
   },fed:{
     type:Number,

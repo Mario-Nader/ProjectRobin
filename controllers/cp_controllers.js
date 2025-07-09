@@ -93,6 +93,20 @@ async function buy(req,res){//need to add comment here
  
 }
 
+async function getBuy(res,req){
+  try{
+  let pat = await findOne({name : req.patrol}).exec()
+  let quantity = req.body.quantity
+  let type =  req.body.type
+  let asset = await Asset.findOne({asset : type}).exec()
+  let cost  = asset.cost * quantity
+  return res.status(200).send({"cost" : cost , "coins": pat.coins})
+  }catch(err){
+    console.log(err.message)
+    res.status(500).send({message:"error in getBuy"})
+  }
+  
+}
 
 //must do a function that return all the costs on the get method on the /buy route
 function assetMap(name){//map the name in the assets with the names in the patrol module the work with the buy function
@@ -331,8 +345,9 @@ async function getAttackKadr(req,res){
   try{
   let patName = req.patrol
   let patrol = await Patrol.findOne({name : patName}).exec()
-  let land = await Land.findOne({land_no : req.body.landNo}).exec()
-  let conditions = land.conditions
+  let attackedLand = await Land.findOne({land_no : req.body.landNo}).exec()
+  let land = await Land.findOne({land_no : req.body.attackedLand})
+  let conditions = attackedLand.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
   qualifications.apple = patrol.apple
@@ -340,6 +355,7 @@ async function getAttackKadr(req,res){
   qualifications.watermelon = patrol.watermelon
   qualifications.soil = patrol.tot_soil
   qualifications.houses = patrol.tot_houses
+  qualifications.inLandSoldiers = land.soldiers
   return res.status(200).send({"conditions":conditions ,"qualifications":qualifications})
   }catch(err){
     console.log(err.message)
@@ -349,7 +365,24 @@ async function getAttackKadr(req,res){
 
 async function attackKadr(req,res){
   let land = await Land.findOne({land_no : req.body.landNo}).exec()
-  
+  let attackedLand = await Land.findOne({land_no : req.body.attackedLand})
+  let kadr = await Patrol.findOne({name : "kadr"}).exec()
+  if(! land.patrol_ID.equals(kadr.id)){
+    return res.status(400).send({message : "the land doesn't belong to kadr"})
+  }
+  let patrol = await Patrol.findOne({name : req.patrol}).exec()
+  let conditions = land.conditions
+  let qualifications = {}
+  qualifications.soldiers = patrol.tot_sol
+  qualifications.apple = patrol.apple
+  qualifications.wheat = patrol.wheat
+  qualifications.watermelon = patrol.watermelon
+  qualifications.soil = patrol.tot_soil
+  qualifications.houses = patrol.tot_houses 
+  qualifications.lands = patrol.tot_lands
+  qualifications.inLandSoldiers = land.soldiers
+
+
 }
 
 
@@ -496,4 +529,4 @@ async function feeding(req,res){
 
 
 
-module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr}
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy}

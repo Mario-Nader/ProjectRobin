@@ -9,7 +9,7 @@ async function buy(req,res){//need to add comment here
     let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request
     let type = await Asset.findOne({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
-    let land
+    let land = await Land.findOne({land_no:req.body.landno})//the request will contain the land number
     if(!type){
       return res.status(400).send({
         message:"this asset doesn't exist"
@@ -24,7 +24,6 @@ async function buy(req,res){//need to add comment here
     if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
       let item = assetMap(type.asset)
       if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
-        land = await Land.findOne({land_no:req.body.landno})//the request will contain the land number
         if(item == "tot_workshops"){
               if(land.workshop == true){
                 res.status(400).send({

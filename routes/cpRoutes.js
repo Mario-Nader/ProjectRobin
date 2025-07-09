@@ -15,7 +15,7 @@ router.patch('/transport/process',cp_controller.transport)
 router.patch('/watering',cp_controller.watering)
 router.patch('/feeding',cp_controller.feeding)
 router.get('/kadrAttack',cp_controller.getAttackKadr)
-router.get('/buy',cp_controller.getBuy)
+router.post('/buy',cp_controller.getBuy)
 //attack
 
 

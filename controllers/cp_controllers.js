@@ -365,6 +365,7 @@ async function getAttackKadr(req,res){
 }
 
 async function attackKadr(req,res){
+  try{
   let land = await Land.findOne({land_no : req.body.landNo}).exec()
   let attackedLand = await Land.findOne({land_no : req.body.attackedLand})
   let kadr = await Patrol.findOne({name : "kadr"}).exec()
@@ -381,11 +382,21 @@ async function attackKadr(req,res){
   qualifications.soils = patrol.tot_soil
   qualifications.houses = patrol.tot_houses 
   qualifications.lands = patrol.tot_lands
-  qualifications.inLandSoldiers = land.soldiers
   qualifications.coins = patrol.coins
   let quals = ["soldiers" , "apples", "wheats","watermelons", "soils",
-    "houses","lands","coins","inLandSoldiers"]
-  quals.forEach(());
+    "houses","lands","coins"]
+  let qualified = ! (quals.some((element , index , array)=>{
+    return(qualifications[element] < conditions[element])
+  }))
+  if(! qualified){
+    return res.status(400).send({message:"you are not qualified"})
+  }else{
+    return attack(req,res)
+  }
+}catch(err){
+  console.log(err.message)
+  return res.status(500).send({"error in attackKadr"})
+}
 }
 
 

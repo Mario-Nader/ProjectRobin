@@ -392,12 +392,13 @@ async function addGDP(req,res){
 
 async function attackCondition(req,res){
   try{
-    let {soldiers,houses,lands,coins,inLandSoldiers,landNo} = req.body
+    let {soldiers,houses,lands,coins,inLandSoldiers,landNo,apples,wheats,watermelons,soils} = req.body
     if(landNo < 1 || landNo > 33 || landNo === undefined){
       return res.status(400).send({message:"invalid landNO"})
     }
     let land = await Land.findOne({land_no : landNo}).exec()
-    land.conditions = {soldiers,houses,lands,coins,inLandSoldiers}
+    land.soldiers = inLandSoldiers
+    land.conditions = {soldiers,houses,lands,coins,inLandSoldiers,apples,wheats,watermelons,soils}
     await land.save()
     return res.status(200).send({message:"the conditions were set successfully"})
   }catch(err){

@@ -19,6 +19,7 @@ async function buy(req,res){//need to add comment here
         message:"this patrol doesn't exist"
       })
     }
+    console.log("")
     if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
       let item = assetMap(type.asset)
       if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
@@ -95,7 +96,7 @@ async function buy(req,res){//need to add comment here
 
 async function getBuy(req,res){
   try{
-  let pat = await findOne({name : req.patrol}).exec()
+  let pat = await Patrol.findOne({name : req.patrol}).exec()
   let quantity = req.body.quantity
   let type =  req.body.type
   let asset = await Asset.findOne({asset : type}).exec()
@@ -104,8 +105,7 @@ async function getBuy(req,res){
   }catch(err){
     console.log(err.message)
     return res.status(500).send({message:"error in getBuy"})
-  }
-  
+  } 
 }
 
 //must do a function that return all the costs on the get method on the /buy route
@@ -356,6 +356,7 @@ async function getAttackKadr(req,res){
   qualifications.soils = patrol.tot_soil
   qualifications.houses = patrol.tot_houses
   qualifications.inLandSoldiers = land.soldiers
+  qualifications.coins = patrol.coins
   return res.status(200).send({"conditions":conditions ,"qualifications":qualifications})
   }catch(err){
     console.log(err.message)
@@ -374,15 +375,17 @@ async function attackKadr(req,res){
   let conditions = land.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
-  qualifications.apple = patrol.apple
-  qualifications.wheat = patrol.wheat
-  qualifications.watermelon = patrol.watermelon
-  qualifications.soil = patrol.tot_soil
+  qualifications.apples = patrol.apple
+  qualifications.wheats = patrol.wheat
+  qualifications.watermelons = patrol.watermelon
+  qualifications.soils = patrol.tot_soil
   qualifications.houses = patrol.tot_houses 
   qualifications.lands = patrol.tot_lands
   qualifications.inLandSoldiers = land.soldiers
-
-
+  qualifications.coins = patrol.coins
+  let quals = ["soldiers" , "apples", "wheats","watermelons", "soils",
+    "houses","lands","coins","inLandSoldiers"]
+  quals.forEach(());
 }
 
 

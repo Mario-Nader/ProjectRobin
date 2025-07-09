@@ -5,13 +5,14 @@ const Scout = require("../modules/scout_module")
 
 async function buy(req,res){//need to add comment here
   console.log(req.body.landNo)
+  const landNumber = parseInt(req.body.landNo)
   let user = await Scout.findById(req.id).exec();//grab the user by the ID
   // //if the user is a cp he can buy items by using the patrols resources 
     let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request
     let type = await Asset.findOne({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
-    if (req.body.landNo !== 0){
-    var land = await Land.findOne({land_no:req.body.landNo})//the request will contain the land number
+    if (landNumber !== 0){
+    var land = await Land.findOne({land_no:req.body.landNumber})//the request will contain the land number
     }
     if(!type){
       return res.status(400).send({
@@ -87,7 +88,7 @@ async function buy(req,res){//need to add comment here
         pat[item] = pat[item] + quantity  //incrementing the items
       }   
       pat.coins = pat.coins - (type.cost * quantity);
-      if(req.body.landNo !== 0){
+      if(landNumber !== 0){
       await land.save();
       }
       await pat.save();

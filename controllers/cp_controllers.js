@@ -7,10 +7,10 @@ async function buy(req,res){//need to add comment here
   let user = await Scout.findById(req.id).exec();//grab the user by the ID
   // //if the user is a cp he can buy items by using the patrols resources 
     let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request
-    let type = await Asset.find({asset:req.body.type}).exec();
+    let type = await Asset.findOne({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
     if(!type){
-      res.status(400).send({
+      return res.status(400).send({
         message:"this asset doesn't exist"
       })
     }
@@ -23,7 +23,7 @@ async function buy(req,res){//need to add comment here
     if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
       let item = assetMap(type.asset)
       if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
-        let land = Land.findOne({land_no:req.body.landno})//the request will contain the land number
+        let land = await Land.findOne({land_no:req.body.landno})//the request will contain the land number
         if(item == "tot_workshops"){
               if(land.workshop == true){
                 res.status(400).send({
@@ -111,15 +111,15 @@ async function getBuy(req,res){
 //must do a function that return all the costs on the get method on the /buy route
 function assetMap(name){//map the name in the assets with the names in the patrol module the work with the buy function
  switch(name) {
-  case soldier:
+  case "soldier":
     return "tot_sol";
-  case horse:
+  case "horse":
     return "tot_horses"
-  case cart:
+  case "cart":
     return "tot_carts"
-  case workshop:
+  case "workshop":
     return "tot_workshops"
-  case house:
+  case "house":
     return "tot_houses"
   default:
     return name
@@ -296,7 +296,7 @@ async function plant(req,res){
   }else if(land.soils[targetSoil] == 0){
     return res.status(400).send({message:"the land doesn't have that kind of soil"})
   }else if(seedType == targetSoil){
-   return res.status(4000).send({message:"the soil is already of that kind"})
+   return res.status(400).send({message:"the soil is already of that kind"})
   }else{
     if(seedType == "invalid"){
       res.status(400).send({message:"the seed type is invalid"})
@@ -330,7 +330,7 @@ async function watering(req,res){//watering may end up in the chef controllers
     patrol.farming = true
     patrol.coins -= watering.cost
     await patrol.save()
-    res.status(200).sebd({message:"the plants were watered successfully"})
+    res.status(200).send({message:"the plants were watered successfully"})
   }
 }
 
@@ -385,7 +385,7 @@ async function attackKadr(req,res){
   qualifications.coins = patrol.coins
   let quals = ["soldiers" , "apples", "wheats","watermelons", "soils",
     "houses","lands","coins"]
-  let qualified = ! (quals.some((element , index , array)=>{
+  let qualified = ! (quals.some(element=>{
     return(qualifications[element] < conditions[element])
   }))
   if(! qualified){

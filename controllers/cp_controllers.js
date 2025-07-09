@@ -93,7 +93,7 @@ async function buy(req,res){//need to add comment here
  
 }
 
-async function getBuy(res,req){
+async function getBuy(req,res){
   try{
   let pat = await findOne({name : req.patrol}).exec()
   let quantity = req.body.quantity
@@ -103,7 +103,7 @@ async function getBuy(res,req){
   return res.status(200).send({"cost" : cost , "coins": pat.coins})
   }catch(err){
     console.log(err.message)
-    res.status(500).send({message:"error in getBuy"})
+    return res.status(500).send({message:"error in getBuy"})
   }
   
 }
@@ -350,10 +350,10 @@ async function getAttackKadr(req,res){
   let conditions = attackedLand.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
-  qualifications.apple = patrol.apple
-  qualifications.wheat = patrol.wheat
-  qualifications.watermelon = patrol.watermelon
-  qualifications.soil = patrol.tot_soil
+  qualifications.apples = patrol.apple
+  qualifications.wheats = patrol.wheat
+  qualifications.watermelons = patrol.watermelon
+  qualifications.soils = patrol.tot_soil
   qualifications.houses = patrol.tot_houses
   qualifications.inLandSoldiers = land.soldiers
   return res.status(200).send({"conditions":conditions ,"qualifications":qualifications})

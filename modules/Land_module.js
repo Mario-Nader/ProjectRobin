@@ -92,6 +92,10 @@ const landSchema = new mongoose.Schema({
     "watermelons":{
       type: Number,
       required :true
+    },
+    "soils":{
+      type:Number,
+      required:true
     }
   },fed:{
     type:Number,

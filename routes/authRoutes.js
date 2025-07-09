@@ -11,9 +11,7 @@ router.post('/update', async (req, res) => {
       {},
       {
         $set: {
-          "conditions.apples": 0,
-          "conditions.watermelons": 0,
-          "conditions.wheats": 0
+          "conditions.soils": 0,
         }
       }
     );

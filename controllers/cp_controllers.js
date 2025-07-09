@@ -6,6 +6,7 @@ const Scout = require("../modules/scout_module")
 async function buy(req,res){//need to add comment here
   console.log(req.body.landNo)
   const landNumber = parseInt(req.body.landNo)
+  console.log(landNumber)
   let land = null
   let user = await Scout.findById(req.id).exec();//grab the user by the ID
   // //if the user is a cp he can buy items by using the patrols resources 
@@ -13,7 +14,8 @@ async function buy(req,res){//need to add comment here
     let type = await Asset.findOne({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
     if (landNumber !== 0){
-     land = await Land.findOne({land_no:req.body.landNumber})//the request will contain the land number
+     land = await Land.findOne({land_no:landNumber}).exec()//the request will contain the land number
+     console.log(land)
     }
     if(!type){
       return res.status(400).send({
@@ -29,6 +31,9 @@ async function buy(req,res){//need to add comment here
     if(pat.coins >= (type.cost * quantity)){//check the balance of the patrol to see if it is sufficient
       let item = assetMap(type.asset)
       if(item == "tot_workshops" | item == "tot_sol" |item == "tot_houses"| item  == "soil" | item == "watermelon" |item == "wheat" | item == "apple"){//dealing with land specific purchases
+        if(landNumber == 0){
+          return res.status(400).send({message:"you need land number to purchase this item"})
+        }
         if(item == "tot_workshops"){
               if(land.workshop == true){
                 res.status(400).send({
@@ -75,7 +80,7 @@ async function buy(req,res){//need to add comment here
                     })
                   }else{
                     land.soil_no = land.soil_no + quantity;
-                    land.crops.empty = land.crops.empty + quantity 
+                    land.soils.empty = land.soils.empty + quantity 
                     pat.tot_soil += quantity
                     pat.soils.empty += quantity
                   }

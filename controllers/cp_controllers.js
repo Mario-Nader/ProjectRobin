@@ -9,7 +9,9 @@ async function buy(req,res){//need to add comment here
     let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request
     let type = await Asset.findOne({asset:req.body.type}).exec();
     let pat = await Patrol.findOne({_id : user.patrol}).exec();
+    if (req.body.landNo !== 0){
     let land = await Land.findOne({land_no:req.body.landno})//the request will contain the land number
+    }
     if(!type){
       return res.status(400).send({
         message:"this asset doesn't exist"
@@ -81,7 +83,9 @@ async function buy(req,res){//need to add comment here
         pat[item] = pat[item] + quantity  //incrementing the items
       }   
       pat.coins = pat.coins - (type.cost * quantity);
+      if(req.body.landNo !== 0){
       await land.save();
+      }
       await pat.save();
       res.status(200).send({
         message:"purchase done successful"

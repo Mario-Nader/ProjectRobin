@@ -395,10 +395,20 @@ async function attackKadr(req,res){
   }
 }catch(err){
   console.log(err.message)
-  return res.status(500).send({"error in attackKadr"})
+  return res.status(500).send({message : "error in attackKadr"})
 }
 }
 
+
+
+// async function checkAttack(req,res){
+//   let landNo = req.body.landNo
+//   let land = await Land.findOne({land_no : landNo}).exec()
+//   let kadr = await Patrol.findOne({name : "kadr"}).exec()
+//   if(land.patrol_ID.equals(kadr.id)){
+//     return res.st
+//   }
+// }
 
 async function attack(req,res){
   try{

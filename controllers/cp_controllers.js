@@ -4,6 +4,7 @@ const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
 async function buy(req,res){//need to add comment here
+  console.log(req.body.landNo)
   let user = await Scout.findById(req.id).exec();//grab the user by the ID
   // //if the user is a cp he can buy items by using the patrols resources 
     let quantity = parseInt(req.body.quantity);//extracting the type and quantity from the request
@@ -34,7 +35,10 @@ async function buy(req,res){//need to add comment here
               }else{
                 if(quantity != 1){
                   res.status(400).send({message:"you can't buy more than one workshop in one land"})
-                }else{
+                }else if(land.workshop == true){
+                  return res.status(400).send({message:"you can't build another workshop in this land"})
+                }
+                else{
                   land.workshop = true;
                   pat.tot_workshops = pat.tot_workshops + 1
                 }

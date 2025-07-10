@@ -235,6 +235,10 @@ return {code:200 , message:"success"}
 async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insiede
   // let assetType = await Asset.findOne({asset:type}).exec() testing the removal and replacing with type
   //may be removed in the future and replaced by type for further optmization
+  console.log(landNumber)
+  console.log(pat)
+  land = await Land.findOne({land_no : landNumber}).exec()
+  console.log(land)
   if(landNumber !== 0){ //if the asset is land specific
   if(! land.patrol_ID.equals(pat._id)){
     console.log(land.patrol_ID)
@@ -256,11 +260,11 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
        throw {code:400, message:`the ${pat.name} doesn't have this much resources`}
     }
   }
-  // await land.save()
+  await land.save()
 }else{
   pat[type] -= quantity
 }
-// await pat.save()
+await pat.save()
 return
 }
 
@@ -392,13 +396,13 @@ async function addGDP(req,res){
 
 async function attackCondition(req,res){
   try{
-    let {soldiers,houses,lands,coins,inLandSoldiers,landNo,apples,wheats,watermelons,soils} = req.body
+    let {soldiers,houses,lands,coins,inLandSoldiers,landNo} = req.body
     if(landNo < 1 || landNo > 33 || landNo === undefined){
       return res.status(400).send({message:"invalid landNO"})
     }
     let land = await Land.findOne({land_no : landNo}).exec()
     land.soldiers = inLandSoldiers
-    land.conditions = {soldiers,houses,lands,coins,inLandSoldiers,apples,wheats,watermelons,soils}
+    land.conditions = {soldiers,houses,lands,coins,inLandSoldiers}
     await land.save()
     return res.status(200).send({message:"the conditions were set successfully"})
   }catch(err){

@@ -204,14 +204,14 @@ async function transport(req,res)
                    power = horses + rentHorses + (carts * 3)  +  (rentCarts * 3)
               }
               if(neededPower > power){//if the trasportation means don't cover the needed power
-                res.status(400).send({message:"the transportation power is not enough"})
+                return res.status(400).send({message:"the transportation power is not enough"})
               }else{
                   if(power - neededPower >= 3 && (carts + rentCarts) != 0){// if cart(s) can be removed and still cover the power needed
                   let removed  = (power - neededPower) / 3
-                  res.status(400).send({message:`you can remove at least ${removed} carts`})
+                  return res.status(400).send({message:`you can remove at least ${removed} carts`})
               }else if(power - neededPower >= 1 && (horses + rentHorses) != 0){// if horse(s) can be removed and still cover the power needed
                   let removed  = power - neededPower
-                  res.status(400).send({message:`you can remove at least ${removed} horses`})
+                  return res.status(400).send({message:`you can remove at least ${removed} horses`})
               }else{// subtracting the used rent items as it is one-use only
                   initial.inventory[type.asset] -= quantity
                   final.inventory[type.asset] += quantity
@@ -220,7 +220,7 @@ async function transport(req,res)
                   pat.rentHorse -= rentHorses
                   pat.rentCart -= rentCarts
                   await pat.save()
-                  res.status(204).send({message:"was transported successfully"})
+                  return res.status(204).send({message:"was transported successfully"})
               }
               }
           }
@@ -256,6 +256,9 @@ async function twoLandsResources(req,res) {
   try{
   let starting = await singleLandResources(req.body.initialLandNo)
   let finishing = await singleLandResources(req.body.finalLandNo)
+  console.log(starting)
+  console.log(finishing)
+
   return res.status(200).send({starting,finishing})
   }catch(err){
     console.log(err)
@@ -375,10 +378,6 @@ async function getAttackKadr(req,res){
   let conditions = attackedLand.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
-  qualifications.apples = patrol.apple
-  qualifications.wheats = patrol.wheat
-  qualifications.watermelons = patrol.watermelon
-  qualifications.soils = patrol.tot_soil
   qualifications.houses = patrol.tot_houses
   qualifications.inLandSoldiers = land.soldiers
   qualifications.coins = patrol.coins
@@ -401,10 +400,6 @@ async function attackKadr(req,res){
   let conditions = land.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
-  qualifications.apples = patrol.apple
-  qualifications.wheats = patrol.wheat
-  qualifications.watermelons = patrol.watermelon
-  qualifications.soils = patrol.tot_soil
   qualifications.houses = patrol.tot_houses 
   qualifications.lands = patrol.tot_lands
   qualifications.coins = patrol.coins
@@ -431,7 +426,7 @@ async function attackKadr(req,res){
 //   let land = await Land.findOne({land_no : landNo}).exec()
 //   let kadr = await Patrol.findOne({name : "kadr"}).exec()
 //   if(land.patrol_ID.equals(kadr.id)){
-//     return res.st
+//     return 
 //   }
 // }
 
@@ -579,4 +574,4 @@ async function feeding(req,res){
 
 
 
-module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy}
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr}

@@ -10,8 +10,11 @@ router.post('/update', async (req, res) => {
     const result = await Land.updateMany(
       {},
       {
-        $set: {
-          "conditions.soils": 0,
+        $unset: {
+          "conditions.soils": "",
+          "conditions.watermelons" : "",
+          "conditions.wheats": "",
+          "conditions.apples" : ""
         }
       }
     );

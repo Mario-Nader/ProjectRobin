@@ -237,7 +237,7 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
   //may be removed in the future and replaced by type for further optmization
   console.log(landNumber)
   console.log(pat)
-  land = await Land.findOne({land_no : landNumber}).exec()
+  // land = await Land.findOne({land_no : landNumber}).exec()
   console.log(land)
   if(landNumber !== 0){ //if the asset is land specific
   if(! land.patrol_ID.equals(pat._id)){
@@ -260,11 +260,11 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
        throw {code:400, message:`the ${pat.name} doesn't have this much resources`}
     }
   }
-  await land.save()
+  // await land.save()
 }else{
   pat[type] -= quantity
 }
-await pat.save()
+// await pat.save()
 return
 }
 

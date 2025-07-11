@@ -323,8 +323,8 @@ async function plant(req,res){
   let land = await Land.findOne({land_no : landnum}).exec()
   let targetSoil = req.body.targetSoil
   let targetSeed = req.body.targetSeed//the target seed name will come in plural form in the request
-  if (targetSeed == ""){
-    targetSeed = "empty"
+  if (targetSoil == ""){
+    targetSoil = "empty"
   }
   console.log(`the targetSoil : ${targetSoil}`)
   console.log(`the targetSeed : ${targetSeed}`) 

@@ -327,7 +327,7 @@ async function plant(req,res){
 
   console.log(`the targetSoil : ${targetSoil}`)
   console.log(`the targetSeed : ${targetSeed}`) 
-  // let seedType = seedMap(targetSeed) //the front-end sent it wrong
+  let seedType = targetSeed //the front-end sent it wrong
   console.log(`the seed type : ${seedType}`)
   let pat = await Patrol.findOne({name : req.patrol}).exec()
   console.log(req.patrol)

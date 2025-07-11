@@ -273,7 +273,9 @@ async function getPlant(req,res){
   let land = await Land.findOne({land_no:req.body.landNo}).exec()
   let patrol = await Patrol.findOne({name:req.patrol}).exec()
   if(! land.patrol_ID.equals(patrol.id)){
-    return res.status(400).send({message:`the ${patrol.name} does not own this land`})
+    return res.status(400).send({message:`the ${(patrol.name).toUpperCase()} does not own this land`})
+  }if(req.body.landNo > 33 ||  req.body.landNo < 1){
+    return res.status(400).send({message:"enter a valid land number"})
   }
   let landSoils = {
     "empty":land.soils.empty,
@@ -343,9 +345,6 @@ async function plant(req,res){
       }
   }
 }
-
-
-
 
 
 

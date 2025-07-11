@@ -315,6 +315,18 @@ function seedMap(seedName){
   }
 }
 
+function seedMap2(cropName){
+  switch(cropName){
+    case "wheat":
+      return "wheatSeeds"
+    case "apple":
+      return "appleSeeds"
+    case "watermelon":
+      return "watermelonSeeds"
+    default:
+      return "invalid"
+  }
+}
 
 
 async function plant(req,res){
@@ -328,6 +340,7 @@ async function plant(req,res){
   console.log(`the targetSoil : ${targetSoil}`)
   console.log(`the targetSeed : ${targetSeed}`) 
   let seedType = targetSeed //the front-end sent it wrong
+  targetSeed = seedMap2(seedType)
   console.log(`the seed type : ${seedType}`)
   let pat = await Patrol.findOne({name : req.patrol}).exec()
   console.log(req.patrol)

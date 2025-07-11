@@ -298,11 +298,6 @@ async function getPlant(req,res){
 }
 }
 
-async function postPlant(req,res){
-  let landNo = parseInt(req.body.landNo)
-  let patrolName = req.patrol
-  let patrol = await Patrol.
-}
 
 function seedMap(seedName){
   switch(seedName){

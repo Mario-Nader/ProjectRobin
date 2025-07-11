@@ -271,6 +271,10 @@ async function twoLandsResources(req,res) {
 async function getPlant(req,res){
   try{
   let land = await Land.findOne({land_no:req.body.landNo}).exec()
+  let patrol = await Patrol.findOne({name:req.patrol}).exec()
+  if(! land.patrol_ID.equals(patrol.id)){
+    return res.status(400).send({message:`the ${patrol.name} does not own this land`})
+  }
   let landSoils = {
     "empty":land.soils.empty,
     "apple":land.soils.apple,
@@ -294,7 +298,11 @@ async function getPlant(req,res){
 }
 }
 
-
+async function postPlant(req,res){
+  let landNo = parseInt(req.body.landNo)
+  let patrolName = req.patrol
+  let patrol = await Patrol.
+}
 
 function seedMap(seedName){
   switch(seedName){

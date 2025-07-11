@@ -318,17 +318,16 @@ function seedMap(seedName){
 
 
 async function plant(req,res){
+  console.log(req)
   let landnum = req.body.landNo
   console.log(`the land number : ${landnum}`)
   let land = await Land.findOne({land_no : landnum}).exec()
   let targetSoil = req.body.targetSoil
   let targetSeed = req.body.targetSeed//the target seed name will come in plural form in the request
-  if (targetSoil == ""){
-    targetSoil = "empty"
-  }
+
   console.log(`the targetSoil : ${targetSoil}`)
   console.log(`the targetSeed : ${targetSeed}`) 
-  let seedType = seedMap(targetSeed)
+  // let seedType = seedMap(targetSeed) //the front-end sent it wrong
   console.log(`the seed type : ${seedType}`)
   let pat = await Patrol.findOne({name : req.patrol}).exec()
   console.log(req.patrol)

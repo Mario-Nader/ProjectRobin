@@ -1,8 +1,33 @@
 const Scout = require('../modules/scout_module');
 const Patrol = require('../modules/patrol_module')
+const Asset = require('../modules/assets_module')
 // const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
+
+async function closedRejection(req,res,next){
+    let closed = await Asset.findOne({asset : "closed"}).exec()
+    if(closed.cost === 1){
+        return res.status(400).send({message:"the game is closed now"})
+    }else{
+        next()
+    }
+}
+
+async function close(req,res){
+    let closed = await Asset.findOne({asset:"closed"}).exec()
+    let message = ""
+    if(closed.cost === 1){
+        closed.cost = 0
+        message = "the game is opned successfully"
+    }else{
+        closed.cost = 1
+        message = "the game is closed successfully"
+    }
+    await closed.save()
+    return res.status(200).send({"message":message})
+}
+
 
 function createToken(id,patrol){
     return jwt.sign({id,patrol},process.env.secretTokenString,{
@@ -161,4 +186,4 @@ async function chefValidation (req,res,next){
 }
 
 
-module.exports = {signup,login,authenMid,verifyUser,logout,CPvalidation,chefValidation}
+module.exports = {signup,login,authenMid,verifyUser,logout,CPvalidation,chefValidation,closedRejection,close}

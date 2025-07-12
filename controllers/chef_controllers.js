@@ -122,11 +122,11 @@ async function harvest(req, res) {
   }
   farmings.forEach((element) => {element.farming = false})
   await Promise.all(farmings.map(pat => pat.save()))
-  res.status(200).send({message:"harvest done successfully"})
+  return res.status(200).send({message:"harvest done successfully"})
 }
 catch(err){
     console.log(err)
-    res.status(500).send({message:"error in harvesting please try again later"})
+    return res.status(500).send({message:"error in harvesting please try again later"})
   }
 }
 

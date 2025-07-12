@@ -39,12 +39,12 @@ async function buy(req,res){//need to add comment here
         }
         if(item == "tot_workshops"){
               if(land.workshop == true){
-                res.status(400).send({
+               return res.status(400).send({
                   message:"the land has already a workshop"
                 })
               }else{
                 if(quantity != 1){
-                  res.status(400).send({message:"you can't buy more than one workshop in one land"})
+                  return res.status(400).send({message:"you can't buy more than one workshop in one land"})
                 }else if(land.workshop == true){
                   return res.status(400).send({message:"you can't build another workshop in this land"})
                 }
@@ -61,7 +61,7 @@ async function buy(req,res){//need to add comment here
                   land.houses = land.houses + quantity;
                   pat.tot_houses = pat.tot_houses + quantity;
                 }else{
-                  res.status(400).send({
+                  return res.status(400).send({
                     message:"the houses are already maximum on this land"
                   })
                 }
@@ -78,7 +78,7 @@ async function buy(req,res){//need to add comment here
         }else if(item == "soil"){
           if(land.soil_no < 5){
                   if(land.soil_no + quantity > 5){
-                    res.status(400).send({
+                    return res.status(400).send({
                       message: "the quantity is more than the allowed limit of soils in one land"
                     })
                   }else{
@@ -88,7 +88,7 @@ async function buy(req,res){//need to add comment here
                     pat.soils.empty += quantity
                   }
                 }else{
-                  res.status(400).send({
+                  return res.status(400).send({
                     message:"the soil limit in this land was reached"
                   })
                 }
@@ -101,11 +101,11 @@ async function buy(req,res){//need to add comment here
       await land.save();
       }
       await pat.save();
-      res.status(200).send({
+      return res.status(200).send({
         message:"purchase done successful"
       })
     }else{//if the balance in not sufficient
-      res.status(401).send({
+      return res.status(401).send({
         message:"no enough coins"
       })
     }
@@ -160,17 +160,17 @@ async function transport(req,res)
     console.log(initial)
     let final = await Land.findOne({land_no : finalNo}).exec()
     if(initialNo == finalNo){//if both numbers are equal
-      res.status(400).send({message:"both lands are the same land"})
+      return res.status(400).send({message:"both lands are the same land"})
     }else if( ! initial.patrol_ID.equals(pat._id) && ! final.patrol_ID.equals(pat._id)){//the two lands are not owned by the patrol
-          res.status(400).send({
+          return res.status(400).send({
               message:"the patrol doesn't own both lands"
           })
       }else if(! initial.patrol_ID.equals(pat._id)){//the inital land only is not owned by the patrol
-          res.status(400),send({
+          return res.status(400),send({
               message:"the patrol doesn't own the inital land"
           })
       }else if(! final.patrol_ID.equals(pat._id)){//the final land is not owned by the patrol
-          res.status(400).send({message:"the patrol doesn't own the final land"})
+          return res.status(400).send({message:"the patrol doesn't own the final land"})
       }else{
           let typeName = req.body.typeName
           let type = await Asset.findOne({asset : typeName}).exec()
@@ -186,17 +186,17 @@ async function transport(req,res)
         }
           if(type.asset == "soldier"){
               if(initial.soldiers <= quantity){//the land doesn't have enough soldiers to send and keep at least one soldier in the land
-                  res.status(400).send({message:"the inital land doesn't have enough resources"})
+                  return res.status(400).send({message:"the inital land doesn't have enough resources"})
               }else{// calculating the needed power for soldiers
                    neededPower = quantity
                    power = horses + rentHorses + (carts * 5)  +  (rentCarts * 5)
               }
               if(neededPower > power){//if the trasportation means don't cover the needed power
-                res.status(400).send({message:"the transportation power is not enough"})
+                return res.status(400).send({message:"the transportation power is not enough"})
               }
           }else{
               if(initial.inventory[type.asset] < quantity){//the land doesn't have enough resources to send
-                  res.status(400).send({
+                  return res.status(400).send({
                       message:"the intial land doesn't have enough resources"
                   })
               }else{//calculating needed and provided power to trasnport (wheat / apple / watermelon)
@@ -291,13 +291,13 @@ async function getPlant(req,res){
     "watermelon":pat.watermelonSeeds,
     "wheat":pat.wheatSeeds
   }
-  res.status(200).send({
+  return res.status(200).send({
     "landSoil":landSoils,
     "seeds":seeds
   })
 }catch(err){
   console.log(err)
-  res.status(500).send({message:"an error happened in getplant please try again later"})
+  return res.status(500).send({message:"an error happened in getplant please try again later"})
 }
 }
 
@@ -352,7 +352,7 @@ async function plant(req,res){
    return res.status(400).send({message:"the soil is already of that kind"})
   }else{
     if(seedType == "invalid"){
-      res.status(400).send({message:"the seed type is invalid"})
+      return res.status(400).send({message:"the seed type is invalid"})
     }else{
       pat[targetSeed] -= 1
       land.soils[targetSoil] -= 1
@@ -372,15 +372,15 @@ async function watering(req,res){//watering may end up in the chef controllers
   let patrol = await Patrol.findOne({name:req.patrol}).exec()
   let watering = await Asset.findOne({asset:"farming"}).exec()
   if(patrol.farming){
-    res.status(400).send({message:"the patrol already watered it's plants"})
+    return res.status(400).send({message:"the patrol already watered it's plants"})
   }else if(patrol.coins < watering.cost){
-    res.status(400).send({message:"the patrol doesn't have enough money for watering their plants"})
+    return res.status(400).send({message:"the patrol doesn't have enough money for watering their plants"})
   }
   else{
     patrol.farming = true
     patrol.coins -= watering.cost
     await patrol.save()
-    res.status(200).send({message:"the plants were watered successfully"})
+    return res.status(200).send({message:"the plants were watered successfully"})
   }
 }
 

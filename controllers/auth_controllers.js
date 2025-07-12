@@ -73,7 +73,7 @@ async function login(req,res){
     // console.log("Request body:", req.body);
     try{
 const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec();
-console.log("Scout found:", scout);
+// console.log("Scout found:", scout); for logging only
         if(scout){
                 if(scout.password == password){
                     let rank = 0

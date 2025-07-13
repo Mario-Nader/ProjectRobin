@@ -521,6 +521,18 @@ async function attack(req,res){
 }
 
 
+async function getFeeding(req,res){
+  try{
+  patrolName = req.patrol
+  let patrol = await Patrol.findOne({name: patrolName}).exec()
+  let land = await Land.findOne({lane_no : req.landNo}).exec()
+  let unfed = land.houses - land.fed 
+  return res.status(200).send({"totalHouses":land.houses ,"unfed" : unfed , watermelon : land.inventory.watermelon,apple : land.inventory.apple,wheat : land.inventory.wheat})
+  }catch(err){
+    return res.status(500).send({message: "getFeeding error"})
+  }
+}
+
 
 async function feeding(req,res){
   let {numberOfHouses,landNo,watermelon,apple,wheat} = req.body

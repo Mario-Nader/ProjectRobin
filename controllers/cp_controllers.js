@@ -3,6 +3,20 @@ const Patrol = require("../modules/patrol_module")
 const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
+
+
+async function getPatrol(req,res){
+    try{
+    let patrolName = req.patrol
+    let patrol = await Patrol.find({name : patrolName}).exec()
+    patrol.gdp = patrol.fed * 25 //as every house contribute by 25 coins in case it was fed
+    return res.status(200).send({"message":"fetch done sucssfully" , "patrol":patrol})
+  }catch(err){
+    console.log(err.message)
+    return res.status(500).send({message:"error happened in the getGDP"})
+  }
+}
+
 async function buy(req,res){//need to add comment here
   console.log(req.body.landNo)
   const landNumber = parseInt(req.body.landNo)
@@ -258,8 +272,12 @@ async function twoLandsResources(req,res) {
   let finishing = await singleLandResources(req.body.finalLandNo)
   console.log(starting)
   console.log(finishing)
-
-  return res.status(200).send({starting,finishing})
+  let patrol = await Patrol.findOne({name : req.patrol}).exec()
+  let horses = patrol.tot_horses
+  let rentHorses = patrol.rentHorse
+  let carts = patrol.tot_carts
+  let rentCarts = patrol.rentCart
+  return res.status(200).send({starting,finishing,"horses": horses, "carts":carts, "rentHorses":rentHorses , "rentCarts": rentCarts})
   }catch(err){
     console.log(err)
     return res.status(500).send({message:"internal server error in the twoLandsResources"})
@@ -383,7 +401,6 @@ async function watering(req,res){//watering may end up in the chef controllers
     return res.status(200).send({message:"the plants were watered successfully"})
   }
 }
-
 
 
 async function viewMap(){
@@ -636,4 +653,4 @@ async function checkLandNo(req,res){
 }
 
 
-module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding}
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding,getPatrol}

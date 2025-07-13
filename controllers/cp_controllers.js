@@ -553,7 +553,12 @@ async function feeding(req,res){
   }
   let neededFood = unfed * 5
   let food = (watermelon * 4) + (wheat) + (apple * 2)
+  console.log("watermelon: " + watermelon)
+  console.log("wheat: " + wheat)
+  console.log("apple: " + apple)
   if(neededFood > food){
+    console.log("needed Food: " +neededFood)
+    console.log("food:" + food)
     return res.status(400).send({message:"not enough food"})
   }
   if(land.inventory.apple < apple || land.inventory.wheat < wheat || land.inventory.watermelon < watermelon){

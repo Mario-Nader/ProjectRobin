@@ -4,7 +4,6 @@ const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
 
-
 async function getPatrol(req,res){
     try{
     let patrolName = req.patrol
@@ -246,8 +245,6 @@ async function transport(req,res)
 
 }
 
-
-
 async function singleLandResources(landNo){
   try{
   let land = await Land.findOne({land_no:landNo}).exec()
@@ -263,8 +260,6 @@ async function singleLandResources(landNo){
   }
 
 }
-
-
 
 async function twoLandsResources(req,res) {
   try{
@@ -283,8 +278,6 @@ async function twoLandsResources(req,res) {
     return res.status(500).send({message:"internal server error in the twoLandsResources"})
   }
 }
-
-
 
 async function getPlant(req,res){
   try{
@@ -319,7 +312,6 @@ async function getPlant(req,res){
 }
 }
 
-
 function seedMap(seedName){
   switch(seedName){
     case "wheatSeeds":
@@ -345,7 +337,6 @@ function seedMap2(cropName){
       return "invalid"
   }
 }
-
 
 async function plant(req,res){
   console.log(req)
@@ -384,8 +375,6 @@ async function plant(req,res){
   }
 }
 
-
-
 async function watering(req,res){//watering may end up in the chef controllers
   let patrol = await Patrol.findOne({name:req.patrol}).exec()
   let watering = await Asset.findOne({asset:"farming"}).exec()
@@ -402,11 +391,9 @@ async function watering(req,res){//watering may end up in the chef controllers
   }
 }
 
-
-
-
 async function getAttackKadr(req,res){
-  try{
+  try{//get the conditions of the land using attacked land only from the request
+    //and get the qualifications of the patrol
   let patName = req.patrol
   let patrol = await Patrol.findOne({name : patName}).exec()
   let attackedLand = await Land.findOne({land_no : req.body.landNo}).exec()
@@ -424,16 +411,18 @@ async function getAttackKadr(req,res){
   }
 }
 
-async function attackKadr(req,res){
+async function attackKadr(req,res){//checking the qualifications of the patrol overall with the attacked land
+  //and then useing the attack function to complete the action
+  //the req.body should contain the {initalL:land_no,attackedL:land_no}
   try{
-  let land = await Land.findOne({land_no : req.body.landNo}).exec()
-  let attackedLand = await Land.findOne({land_no : req.body.attackedLand})
+  // let land = await Land.findOne({land_no : req.body.landNo}).exec() not needed
+  let attackedLand = await Land.findOne({land_no : req.body.attackedL})
   let kadr = await Patrol.findOne({name : "kadr"}).exec()
-  if(! land.patrol_ID.equals(kadr.id)){
+  if(! attackedLand.patrol_ID.equals(kadr.id)){
     return res.status(400).send({message : "the land doesn't belong to kadr"})
   }
   let patrol = await Patrol.findOne({name : req.patrol}).exec()
-  let conditions = land.conditions
+  let conditions = attackedLand.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
   qualifications.houses = patrol.tot_houses 
@@ -441,12 +430,13 @@ async function attackKadr(req,res){
   qualifications.coins = patrol.coins
   let quals = ["soldiers" , "apples", "wheats","watermelons", "soils",
     "houses","lands","coins"]
-  let qualified = ! (quals.some(element=>{
+  let qualified = ! (quals.some(element=>{//checking if the patrol passes all the qualifications
     return(qualifications[element] < conditions[element])
   }))
   if(! qualified){
     return res.status(400).send({message:"you are not qualified"})
   }else{
+    req.body.attackedPatrol = "kadr"
     return attack(req,res)
   }
 }catch(err){
@@ -455,20 +445,27 @@ async function attackKadr(req,res){
 }
 }
 
+//getAttackKadr   attackKadr   attack checkAttack
 
-
-// async function checkAttack(req,res){
-//   let landNo = req.body.landNo
-//   let land = await Land.findOne({land_no : landNo}).exec()
-//   let kadr = await Patrol.findOne({name : "kadr"}).exec()
-//   if(land.patrol_ID.equals(kadr.id)){
-//     return 
-//   }
-// }
-
-async function attack(req,res){
+async function checkAttack(req,res){
   try{
-  let {initialL,attackedL,attackedPatrol} = req.body
+  let landNo = req.body.landNo
+  let land = await Land.findOne({land_no : landNo}).exec()
+  let kadr = await Patrol.findOne({name : "kadr"}).exec()
+  if(land.patrol_ID.equals(kadr.id)){
+    return res.status(200).send({attacked:"kadr"})
+  }else{
+    return res.status(200).send({attacked:"patrol"})
+  }
+}catch(err){
+  console.log(err.message)
+  return res.status(500).send({"message":"error in checkAttack"})
+}
+}
+
+async function attack(req,res){//attack process in general
+  try{//the request should contain {initalL: land_no , attackedL:land_no, attackedPatrol: "name"}
+  let {initialL,attackedL,attackedPatrol,soldiers} = req.body
   let initialLand = await Land.findOne({land_no : initialL}).exec()
   let attackedLand = await Land.findOne({land_no : attackedL}).exec()
   patrolName = req.patrol
@@ -481,20 +478,25 @@ async function attack(req,res){
   }
    if(! initialPat._id.equals(initialLand.patrol_ID)){
     return res.status(400).send({message:"the patrol doesn't own this land"})
-  }else if(initialLand.soldiers - attackedLand.soldiers < 2){
+  }else if(soldiers - attackedLand.soldiers < 2){
     return res.status(400).send({message:"not enough soldiers to attack"})
+  }else if(soldiers > initialLand.soldiers){
+    return res.status(400).send({message:"this land doesn't contain this much soldiers"})
+  }else if(! attackedLand.patrol_ID.equals(attackedPat.id)){
+    return res.status(400).send({message:"the attacked patrol does not own the attacked land"})
   }else{
-    let soldiers = initialLand.soldiers
+    initialLand.soldiers -= soldiers
     soldiers -= attackedLand.soldiers
     attackedPat.tot_sol -= attackedLand.soldiers
     initialPat.tot_sol -= attackedLand.soldiers
     if(soldiers % 2 == 0){
-      initialLand.soldiers = soldiers / 2
+      initialLand.soldiers += soldiers / 2
       attackedLand.soldiers = soldiers / 2
     }else{
-      initialLand.soldiers = Math.floor(soldiers / 2) + 1
+      initialLand.soldiers += Math.floor(soldiers / 2) + 1
       attackedLand.soldiers = Math.floor(soldiers / 2)
     }
+    initialPat.tot_sol += soldiers
     attackedLand.patrol_ID = initialPat._id
     attackedPat.tot_lands -= 1
     initialPat.tot_lands += 1
@@ -534,6 +536,26 @@ async function attack(req,res){
 }
 }
 
+async function getAttackPatrol(req,res){
+  try{
+  let attackedLandNo = req.body.attackedL
+  let attackedLand = await Land.findOne({land_no : attackedLandNo}).exec()
+  let Aland = {
+    soldiers: attackedLand.soldiers,
+    wheat : attackedLand.inventory.wheat,
+    watermelon : attackedLand.inventory.watermelon,
+    apple : attackedLand.inventory.apple,
+    houses : attackedLand.houses
+  }
+  let initialLandNo = req.body.initialL
+  let initialLand = await Land.findOne({land_no : initialLandNo}).exec()
+  let availableSoldiers = initialLand.soldiers
+  return res.status(200).send({attackedLand:Aland , soldiers : availableSoldiers})
+}catch(err){
+  return res.status(500).send({message:"error in getAttackPatrol"})
+}
+
+}
 
 async function getFeeding(req,res){
   try{
@@ -650,4 +672,4 @@ async function checkLandNo(req,res){
 }
 
 
-module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding,getPatrol}
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding,getPatrol,checkAttack}

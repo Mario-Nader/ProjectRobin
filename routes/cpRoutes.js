@@ -19,5 +19,6 @@ router.patch('/attack',auth.closedRejection,cp_controller.attack)
 router.patch('/feeding',cp_controller.checkLandNo)
 router.post('/feeding',cp_controller.getFeeding)    
 router.get('/',cp_controller.getPatrol)
+router.post('/attack',cp_controller.checkAttack)
 
 module.exports = router

@@ -620,4 +620,4 @@ async function checkLandNo(req,res){
 }
 
 
-module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo}
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding}

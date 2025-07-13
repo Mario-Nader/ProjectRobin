@@ -18,5 +18,6 @@ router.get('/kadrAttack',auth.closedRejection,cp_controller.getAttackKadr)
 router.post('/buy',cp_controller.getBuy)
 router.patch('/attack',auth.closedRejection,cp_controller.attack)
 router.patch('/feeding',cp_controller.checkLandNo)
+router.post('/feeding',cp_controller.getFeeding)
 
 module.exports = router

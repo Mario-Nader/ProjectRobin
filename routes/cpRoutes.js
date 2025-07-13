@@ -13,10 +13,11 @@ router.post('/plant',cp_controller.getPlant)
 router.patch('/plant/process',auth.closedRejection,cp_controller.plant)
 router.patch('/transport/process',auth.closedRejection,cp_controller.transport)
 router.patch('/watering',auth.closedRejection,cp_controller.watering)
-router.patch('/feeding',auth.closedRejection,cp_controller.feeding)
+router.patch('/feeding/process',auth.closedRejection,cp_controller.feeding)
 router.get('/kadrAttack',auth.closedRejection,cp_controller.getAttackKadr)
 router.post('/buy',cp_controller.getBuy)
 router.patch('/attack',auth.closedRejection,cp_controller.attack)
+router.patch('/feeding',cp_controller.checkLandNo)
 
 
 module.exports = router

@@ -70,26 +70,22 @@ async function getharvest(req,res){
 
 
 async function watering(req,res){
-  let id = req.id
-  let chef = await Scout.findById(id).exec()
-  if(!chef){
-    return res.status(404).send({message:"chef not found"})
-  }
-  let chPat = await Patrol.findById(chef.patrol,{name:1,_id:0}).exec()
-  if(chPat.name == "kadr"){
-  let pat = req.patrol
-  let patrol = await Patrol.findOne({name:pat},{_id:1,farming:1}).exec()
+  let farmingAsset = await Asset.findOne({asset : "farming" }).exec()
+  let pat = req.body.patrol
+  let patrol = await Patrol.findOne({name:pat},{_id:1,farming:1,coins:1}).exec()
   if(patrol){
   if(patrol.farming){
     return res.status(400).send({message:"this patrol has already watered their plants"})
   }else{
+    if(patrol.coins < farmingAsset.cost){
+      return res.status(400).send({message:"not enough balance for watering"})
+    }else{
     patrol.farming = true
+    patrol.coins -= farmingAsset.cost
     await patrol.save()
     return res.status(200).send({message:"the plants were watered successfully"})
+    }
   }
-}else{
-  return res.status(403).send({message:"must be a chef to water the plants"})
-}
 }else{
   return res.status(400).send({message:"this patrol doesn't exist"})
 }

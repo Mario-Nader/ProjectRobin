@@ -454,19 +454,18 @@ async function attackKadr(req,res){
 
 async function attack(req,res){
   try{
-  let {initialL,attackedL,initalPatrol,attackedPatrol} = req.body
+  let {initialL,attackedL,attackedPatrol} = req.body
   let initialLand = await Land.findOne({land_no : initialL}).exec()
   let attackedLand = await Land.findOne({land_no : attackedL}).exec()
-  let initialPat = await Patrol.findOne({name:initalPatrol}).exec()
+  patrolName = req.patrol
+  let initialPat = await Patrol.findOne({name:patrolName}).exec()
   let attackedPat = await Patrol.findOne({name:attackedPatrol}).exec()
   let adjacent = initialLand.adjacent
   let adj = adjacent.some(element => element === attackedLand.land_no)
   if(!adj){
     return res.status(400).send({message:"the two lands are not adjacent"})
   }
-  if(req.patrol !== initialPat.name){
-    return res.status(400).send({message:"you don't belong to this patrol"})
-  }else if(! initialPat._id.equals(initialLand.patrol_ID)){
+   if(! initialPat._id.equals(initialLand.patrol_ID)){
     return res.status(400).send({message:"the patrol doesn't own this land"})
   }else if(initialLand.soldiers - attackedLand.soldiers < 2){
     return res.status(400).send({message:"not enough soldiers to attack"})

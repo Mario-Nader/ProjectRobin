@@ -19,5 +19,4 @@ router.post('/buy',cp_controller.getBuy)
 router.patch('/attack',auth.closedRejection,cp_controller.attack)
 router.patch('/feeding',cp_controller.checkLandNo)
 
-
 module.exports = router

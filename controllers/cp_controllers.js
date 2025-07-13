@@ -569,19 +569,22 @@ async function feeding(req,res){
     apples:0,
     wheats:0
   }
+  let exceededBool = false
   if(neededFood < food){
+    console.log("neededFood < food")
     let ex = 0;
     if(food - neededFood > 4 && watermelon > 0){
-      ex = parseInt(food - neededFood / 4)
+      console.log("food - neededFood > 4 && watermelon > 0")
+      ex = parseInt(Math.floor((food - neededFood) / 4))
       if (watermelon >= ex){
         exceeded.watermelons = ex
       }else{
         exceeded.watermelons = watermelon
       }
-      food -= exceeded.watermelons * 5
+      food -= exceeded.watermelons * 4
     }
     if(food - neededFood > 2 && apple > 0){
-      ex = parseInt(food - neededFood / 2)
+      ex = parseInt(Math.floor((food - neededFood) / 2))
       if (apple >= ex){
         exceeded.apples = ex
       }else{
@@ -590,7 +593,7 @@ async function feeding(req,res){
       food -= exceeded.apples * 2
     }
     if(food - neededFood > 1 && wheat > 0){
-      ex = parseInt(food - neededFood)
+      ex = parseInt(MMath.floor((food - neededFood)))
       if (wheat >= ex){
         exceeded.wheats = ex
       }else{
@@ -598,6 +601,13 @@ async function feeding(req,res){
       }
       food -= exceeded.wheats
     }
+    if(exceeded.wheats === 0 && exceeded.watermelons === 0 && exceeded.apples === 0){
+      exceededBool = false
+    }else{
+      exceededBool = true
+    }
+  }
+  if(exceededBool){
     return res.status(400).send({message:"you could remove all of these crops","exceeded":exceeded})
   }else{
     land.fed += numberOfHouses
@@ -606,6 +616,7 @@ async function feeding(req,res){
     await patrol.save()
     return res.status(200).send({message:"feeding done successfully"})
   }
+
 
   
 }

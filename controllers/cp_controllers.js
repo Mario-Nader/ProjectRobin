@@ -594,6 +594,19 @@ async function feeding(req,res){
   
 }
 
+async function checkLandNo(req,res){
+  let patrolName = req.patrol
+  let patrol = await Patrol.findOne({name : patrolName}).exec()
+  let landNo = req.body.landNo
+  let land = await Land.findOne({land_no : landNo}).exec()
+  if(!land.patrol_ID.equals(patrol.id)){
+    return res.status(400).send({message:"the land doesn't belong to the patrol"})
+  }
+  if(landNo > 33 || landNo < 1){
+    return res.status(400).send({message:"invalid land number"})
+  }
+  return res.status(200).send({message:"the land number is valid"})
+}
 
 
 module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr}

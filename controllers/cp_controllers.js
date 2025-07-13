@@ -569,7 +569,6 @@ async function getFeeding(req,res){
   }
 }
 
-
 async function feeding(req,res){
   let {numberOfHouses,landNo,watermelon,apple,wheat} = req.body
   let land = await Land.findOne({land_no : landNo}).exec()

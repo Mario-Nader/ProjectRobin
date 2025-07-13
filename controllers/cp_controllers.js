@@ -403,10 +403,7 @@ async function watering(req,res){//watering may end up in the chef controllers
 }
 
 
-async function viewMap(){
-  let landArr = await Land.find().exec()
-  return landArr;  
-}
+
 
 async function getAttackKadr(req,res){
   try{

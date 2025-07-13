@@ -6,7 +6,6 @@ const auth = require('../controllers/auth_controllers')
 router.use(auth.authenMid,auth.verifyUser,auth.CPvalidation)
 
 router.patch('/transport/process',auth.closedRejection,cp_controller.transport)
-
 router.patch('/transport',cp_controller.twoLandsResources)
 router.patch('/buy',auth.closedRejection,cp_controller.buy)
 router.post('/plant',cp_controller.getPlant)
@@ -18,6 +17,7 @@ router.get('/kadrAttack',auth.closedRejection,cp_controller.getAttackKadr)
 router.post('/buy',cp_controller.getBuy)
 router.patch('/attack',auth.closedRejection,cp_controller.attack)
 router.patch('/feeding',cp_controller.checkLandNo)
-router.post('/feeding',cp_controller.getFeeding)
+router.post('/feeding',cp_controller.getFeeding)    
+router.get('/',cp_controller.getPatrol)
 
 module.exports = router

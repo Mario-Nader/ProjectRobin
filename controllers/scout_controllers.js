@@ -14,7 +14,7 @@ async function viewMap(){
     acc[curr.id] = curr.name
     return acc
   },{})
-  landArr.forEach((land,index,array) =>{
+  landArr.forEach((land) =>{
     land.patrol = pats[land.patrol_ID]
     // console.log(land.patrol)
   })

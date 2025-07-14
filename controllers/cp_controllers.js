@@ -538,26 +538,6 @@ async function attack(req,res){//attack process in general
 }
 }
 
-async function getAttackPatrol(req,res){
-  try{
-  let attackedLandNo = req.body.attackedL
-  let attackedLand = await Land.findOne({land_no : attackedLandNo}).exec()
-  let Aland = {
-    soldiers: attackedLand.soldiers,
-    wheat : attackedLand.inventory.wheat,
-    watermelon : attackedLand.inventory.watermelon,
-    apple : attackedLand.inventory.apple,
-    houses : attackedLand.houses
-  }
-  let initialLandNo = req.body.initialL
-  let initialLand = await Land.findOne({land_no : initialLandNo}).exec()
-  let availableSoldiers = initialLand.soldiers
-  return res.status(200).send({attackedLand:Aland , soldiers : availableSoldiers})
-}catch(err){
-  return res.status(500).send({message:"error in getAttackPatrol"})
-}
-
-}
 
 async function getFeeding(req,res){
   try{
@@ -673,7 +653,26 @@ async function checkLandNo(req,res){
 }
 
 async function getAttackPatrol(req,res){
-  let startingLandNo = req.body
+  try{
+  let startingLandNo = req.body.initialLandNo
+  let finishingLandNo = req.body.finalLandNo
+  let startingLand = await Land.findOne({land_no : startingLandNo}).exec()
+  let finishingLand = await Land.findOne({land_no : finishingLandNo}).exec()
+  let attackedPat = await Patrol.findById(finishingLand.patrol_ID).exec()
+  return res.status(200).send({"patrol1":req.patrol,"patrol2":attackedPat.name,"soldiers1":startingLand.soldiers,"soldiers2":finishingLand.soldiers,"resources":{
+    "houses":finishingLand.houses,
+    "appleSoils":finishingLand.soils.apple,
+    "watermelonSoils":finishingLand.soils.watermelon,
+    "wheatSoils":finishingLand.soils.wheat,
+    "emptySoils":finishingLand.soils.empty,
+    "wheat":finishingLand.inventory.wheat,
+    "apple":finishingLand.inventory.apple,
+    "watermelon":finishingLand.inventory.watermelon
+  }})
+}catch(err){
+console.log(err.message)
+
+}
 }
 
-module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding,getPatrol,checkAttack}
+module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding,getPatrol,checkAttack,getAttackPatrol}

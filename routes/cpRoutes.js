@@ -16,9 +16,11 @@ router.patch('/feeding/process',auth.closedRejection,cp_controller.feeding)
 router.get('/kadrAttack',auth.closedRejection,cp_controller.getAttackKadr)
 router.post('/buy',cp_controller.getBuy)
 router.patch('/attack',auth.closedRejection,cp_controller.attack)
+router.patch('/patrolAttack',cp_controller.getAttackPatrol)
 router.patch('/feeding',cp_controller.checkLandNo)
 router.post('/feeding',cp_controller.getFeeding)    
 router.get('/',cp_controller.getPatrol)
 router.post('/attack',cp_controller.checkAttack)
+router.post('/attack/kadr',auth.closedRejection, cp_controller.attackKadr)
 
 module.exports = router

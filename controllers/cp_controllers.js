@@ -11,16 +11,11 @@ async function getPatrol(req, res) {
       let patrolName = req.patrol; 
 
       // Find the patrol(s). This returns an array of Mongoose documents.
-      let patrols = await Patrol.find({ name: patrolName }).exec();
-
-      if (patrols.length === 0) {
-          // Handle case where no patrol is found
-          return res.status(404).send({ message: "Patrol not found" });
-      }
+      let patrol = await Patrol.findOne({ name: patrolName }).exec();
 
       // Assuming you're fetching data for a single patrol.
       // If multiple patrols can match, you might need to iterate or select based on other criteria.
-      const patrolDataFromDb = patrols[0]; // Get the first patrol object from the array
+      const patrolDataFromDb = patrol; // Get the first patrol object from the array
 
       // Calculate GDP for the individual patrol object.
       // Ensure 'fed' property exists on your Patrol model.

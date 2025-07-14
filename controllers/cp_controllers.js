@@ -398,8 +398,8 @@ async function getAttackKadr(req,res){
     //and get the qualifications of the patrol
   let patName = req.patrol
   let patrol = await Patrol.findOne({name : patName}).exec()
-  let attackedLand = await Land.findOne({land_no : req.body.landNo}).exec()
-  let land = await Land.findOne({land_no : req.body.attackedLand})
+  let attackedLand = await Land.findOne({land_no : req.query.landNo}).exec()
+  let land = await Land.findOne({land_no : req.query.attackedLand}).exec()
   let conditions = attackedLand.conditions
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
@@ -672,5 +672,8 @@ async function checkLandNo(req,res){
   return res.status(200).send({message:"the land number is valid"})
 }
 
+async function getAttackPatrol(req,res){
+  let startingLandNo = req.body
+}
 
 module.exports = {buy,transport,twoLandsResources,getPlant,plant,watering,feeding,attack,getAttackKadr,getBuy,attackKadr,checkLandNo,getFeeding,getPatrol,checkAttack}

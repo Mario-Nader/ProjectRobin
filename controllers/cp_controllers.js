@@ -712,7 +712,7 @@ async function getAttackPatrol(req,res){
     "wheat":finishingLand.inventory.wheat,
     "apple":finishingLand.inventory.apple,
     "watermelon":finishingLand.inventory.watermelon
-  }})
+  },"land1":startingLandNo,"land2":finishingLandNo})
 }catch(err){
 console.log(err.message)
 

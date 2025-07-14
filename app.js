@@ -23,7 +23,7 @@ app.use('/CP', cpRoute);
 app.use('/Scout', scoutRoute);
 app.use('/authen', authRoute);
 
-app.listen(port, () => {
+app.listen(port,'0.0.0.0', () => {
   connectDB();
   console.log(`Server is running on port ${port}`);
 });

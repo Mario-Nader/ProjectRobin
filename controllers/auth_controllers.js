@@ -70,6 +70,7 @@ async function  signup(req,res){
 
 async function login(req,res){
     let {name,password} = req.body;
+    console.log(name)
     // console.log("Request body:", req.body);
     try{
 const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec();

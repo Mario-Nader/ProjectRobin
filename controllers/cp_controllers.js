@@ -164,13 +164,14 @@ async function transport(req,res)
     // let id = req.id
     // let user = await Scout.findById(id).exec()
     //if the user is a cp he can preform the action
+    console.log("this is the body : " +  req.body)
     let patrolName = req.patrol
     let pat = await Patrol.findOne({name:patrolName}).exec();
     let initialNo = req.body.intialLand
-    console.log(initialNo)
+    // console.log(initialNo)
     let finalNo= req.body.finalLand
     let initial = await Land.findOne({land_no : initialNo}).exec()
-    console.log(initial)
+    // console.log(initial)
     let final = await Land.findOne({land_no : finalNo}).exec()
     if(initialNo == finalNo){//if both numbers are equal
       return res.status(400).send({message:"both lands are the same land"})
@@ -179,7 +180,7 @@ async function transport(req,res)
               message:"the patrol doesn't own both lands"
           })
       }else if(! initial.patrol_ID.equals(pat._id)){//the inital land only is not owned by the patrol
-          return res.status(400),send({
+          return res.status(400).send({
               message:"the patrol doesn't own the inital land"
           })
       }else if(! final.patrol_ID.equals(pat._id)){//the final land is not owned by the patrol
@@ -187,6 +188,7 @@ async function transport(req,res)
       }else{
           let typeName = req.body.typeName
           let type = await Asset.findOne({asset : typeName}).exec()
+          console.log("the type name : "+type)
           let quantity = req.body.quantity
           let horses = req.body.horses
           let rentHorses = req.body.rentHorses
@@ -233,7 +235,7 @@ async function transport(req,res)
                   pat.rentHorse -= rentHorses
                   pat.rentCart -= rentCarts
                   await pat.save()
-                  return res.status(204).send({message:"was transported successfully"})
+                  return res.status(200).send({message:"was transported successfully"})
               }
               }
           }

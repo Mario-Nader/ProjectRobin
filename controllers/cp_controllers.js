@@ -4,15 +4,64 @@ const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
 
-async function getPatrol(req,res){
-    try{
-    let patrolName = req.patrol
-    let patrol = await Patrol.find({name : patrolName}).exec()
-    patrol.gdp = patrol.fed * 25 //as every house contribute by 25 coins in case it was fed
-    return res.status(200).send({"message":"fetch done sucssfully" , "patrol":patrol})
-  }catch(err){
-    console.log(err.message)
-    return res.status(500).send({message:"error happened in the getGDP"})
+// In your backend controller file (e.g., cp_controller.js)
+async function getPatrol(req, res) {
+  try {
+      // Assuming req.patrol holds the name to search (e.g., "lion")
+      let patrolName = req.patrol; 
+
+      // Find the patrol(s). This returns an array of Mongoose documents.
+      let patrols = await Patrol.find({ name: patrolName }).exec();
+
+      if (patrols.length === 0) {
+          // Handle case where no patrol is found
+          return res.status(404).send({ message: "Patrol not found" });
+      }
+
+      // Assuming you're fetching data for a single patrol.
+      // If multiple patrols can match, you might need to iterate or select based on other criteria.
+      const patrolDataFromDb = patrols[0]; // Get the first patrol object from the array
+
+      // Calculate GDP for the individual patrol object.
+      // Ensure 'fed' property exists on your Patrol model.
+      // Also, access values correctly from the Mongoose object (e.g., patrolDataFromDb.fed)
+      // Adjust for MongoDB's $numberInt structure if necessary (e.g., patrolDataFromDb.fed.$numberInt)
+      // Based on your previous JSON example, simple dot notation should work for direct fields after parsing.
+      const fedValue = patrolDataFromDb.fed !== undefined ? patrolDataFromDb.fed : 0;
+      const calculatedGdp = fedValue * 25; 
+
+      // Construct the response data as an array of strings,
+      // matching the "key: value" format your frontend's getValue expects.
+      // Use default values (e.g., 0) for numbers or empty strings for text if they might be missing.
+      const responsePatrolData = [
+          `total soldiers: ${patrolDataFromDb.tot_sol !== undefined ? patrolDataFromDb.tot_sol : 0}`,
+          `total houses: ${patrolDataFromDb.tot_houses !== undefined ? patrolDataFromDb.tot_houses : 0}`,
+          `total workshops: ${patrolDataFromDb.tot_workshops !== undefined ? patrolDataFromDb.tot_workshops : 0}`,
+          `total carts: ${patrolDataFromDb.tot_carts !== undefined ? patrolDataFromDb.tot_carts : 0}`,
+          `total horses: ${patrolDataFromDb.tot_horses !== undefined ? patrolDataFromDb.tot_horses : 0}`,
+          `rent horses: ${patrolDataFromDb.rentHorse !== undefined ? patrolDataFromDb.rentHorse : 0}`,
+          `rent carts: ${patrolDataFromDb.rentCart !== undefined ? patrolDataFromDb.rentCart : 0}`,
+          `total coins: ${patrolDataFromDb.coins !== undefined ? patrolDataFromDb.coins : 0}`,
+          `total lands: ${patrolDataFromDb.tot_lands !== undefined ? patrolDataFromDb.tot_lands : 0}`,
+          `gdp: ${calculatedGdp}`, // Use the calculated GDP
+          `wheat seeds: ${patrolDataFromDb.wheatSeeds !== undefined ? patrolDataFromDb.wheatSeeds : 0}`,
+          `apple seeds: ${patrolDataFromDb.appleSeeds !== undefined ? patrolDataFromDb.appleSeeds : 0}`,
+          `watermelon seeds: ${patrolDataFromDb.watermelonSeeds !== undefined ? patrolDataFromDb.watermelonSeeds : 0}`,
+          `wheat: ${patrolDataFromDb.wheat !== undefined ? patrolDataFromDb.wheat : 0}`,
+          `apple: ${patrolDataFromDb.apple !== undefined ? patrolDataFromDb.apple : 0}`,
+          `watermelon: ${patrolDataFromDb.watermelon !== undefined ? patrolDataFromDb.watermelon : 0}`,
+          `total soil: ${patrolDataFromDb.tot_soil !== undefined ? patrolDataFromDb.tot_soil : 0}`,
+          `wheat soil: ${patrolDataFromDb.soils && patrolDataFromDb.soils.wheat !== undefined ? patrolDataFromDb.soils.wheat : 0}`,
+          `apple soil: ${patrolDataFromDb.soils && patrolDataFromDb.soils.apple !== undefined ? patrolDataFromDb.soils.apple : 0}`,
+          `watermelon soil: ${patrolDataFromDb.soils && patrolDataFromDb.soils.watermelon !== undefined ? patrolDataFromDb.soils.watermelon : 0}`,
+          `empty soil: ${patrolDataFromDb.soils && patrolDataFromDb.soils.empty !== undefined ? patrolDataFromDb.soils.empty : 0}`
+      ];
+
+      return res.status(200).send({ "message": "fetch done successfully", "patrol": responsePatrolData });
+
+  } catch (err) {
+      console.error("Error in getPatrol:", err.message); // Use console.error for better logging
+      return res.status(500).send({ message: "An error occurred while fetching patrol data." });
   }
 }
 

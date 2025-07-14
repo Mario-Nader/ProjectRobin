@@ -243,6 +243,7 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
   }
   if(type === "soldier"){
     if(land.soldiers >= quantity){
+      console.log("land.soldiers >= quantity" + !!(land.soldiers >= quantity))
     land.soldiers -= quantity
     pat.tot_sol -= quantity
     }else{
@@ -250,6 +251,7 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
     }
   }else{
     if(land.inventory[type] >= quantity){
+    console.log(`land.inventory ${type} : ` + !!(land.inventory[type] >= quantity))  
     land.inventory[type] -= quantity
     pat[type] -= quantity
     }else{

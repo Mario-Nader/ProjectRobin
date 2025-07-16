@@ -672,6 +672,9 @@ async function feeding(req,res){
   if(exceededBool){
     return res.status(400).send({message:"you could remove all of these crops","exceeded":exceeded})
   }else{
+    land.inventory.apple -= apple
+    land.inventory.watermelon -= watermelon
+    land.inventory.wheat -= wheat
     land.fed += numberOfHouses
     patrol.fed += numberOfHouses
     await land.save()

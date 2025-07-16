@@ -613,7 +613,7 @@ async function feeding(req,res){
       message:"the land is already fed"
     })
   }
-  let neededFood = unfed
+  let neededFood = numberOfHouses
   let food = (watermelon * 4) + (wheat) + (apple * 2)
   console.log("watermelon: " + watermelon)
   console.log("wheat: " + wheat)

@@ -492,10 +492,12 @@ async function attackKadr(req,res){//checking the qualifications of the patrol o
 }
 
 //getAttackKadr   attackKadr   attack checkAttack
-
+////////////////////////////////////////////////////////////////
 async function checkAttack(req,res){
   try{
-  let landNo = req.body.landNo
+  let initialLandNo = req.body.landNo
+  let targetLandNo = req.body.targetLandNo
+  conosle.log(targetLandNo  +  " " +  initialLandNo)
   let land = await Land.findOne({land_no : landNo}).exec()
   let kadr = await Patrol.findOne({name : "kadr"}).exec()
   if(land.patrol_ID.equals(kadr.id)){
@@ -596,7 +598,7 @@ async function getFeeding(req,res){
   }
 }
 
-async function feeding(req,res){
+async function feeding(req,res){  
   let {numberOfHouses,landNo,watermelon,apple,wheat} = req.body
   let land = await Land.findOne({land_no : landNo}).exec()
   let user = await Scout.findOne({_id : req.id}).exec()

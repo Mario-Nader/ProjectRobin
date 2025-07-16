@@ -497,10 +497,10 @@ async function checkAttack(req,res){
   try{
   let initialLandNo = req.body.landNo
   let targetLandNo = req.body.targetLandNo
-  conosle.log(targetLandNo  +  " " +  initialLandNo)
-  let land = await Land.findOne({land_no : landNo}).exec()
+  console.log(targetLandNo  +  " " +  initialLandNo)
+  let land = await Land.findOne({land_no : initialLandNo}).exec()
   let kadr = await Patrol.findOne({name : "kadr"}).exec()
-  if(land.patrol_ID.equals(kadr.id)){
+  if(initialLandNo.patrol_ID.equals(kadr.id)){
     return res.status(200).send({attacked:"kadr"})
   }else{
     return res.status(200).send({attacked:"patrol"})

@@ -498,13 +498,25 @@ async function checkAttack(req,res){
   let initialLandNo = req.body.landNo
   let targetLandNo = req.body.targetLandNo
   console.log(targetLandNo  +  " " +  initialLandNo)
-  let land = await Land.findOne({land_no : initialLandNo}).exec()
+  let initialPat = await Patrol.findOne({name : req.patrol}).exec()
+  let initialLand = await Land.findOne({land_no : initialLandNo}).exec()
+  let targetLand = await Land.findOne({land_no : targetLandNo}).exec()
   let kadr = await Patrol.findOne({name : "kadr"}).exec()
+  let adjacent = initialLand.adjacent
+  let adj = adjacent.some(element => element === targetLand.land_no)
+  if(!adj){
+    return res.status(400).send({message:"the two lands are not adjacent"})
+  }else if (targetLand.patrol_ID.equals(initialPat.id)){
+    return res.status(400).send({message:"can't attack your own land"})
+  }if(! initialPat._id.equals(initialLand.patrol_ID)){
+    return res.status(400).send({message:"the patrol doesn't own this land"})
+  }else {  
   if(initialLandNo.patrol_ID.equals(kadr.id)){
     return res.status(200).send({attacked:"kadr"})
   }else{
     return res.status(200).send({attacked:"patrol"})
   }
+}
 }catch(err){
   console.log(err.message)
   return res.status(500).send({"message":"error in checkAttack"})

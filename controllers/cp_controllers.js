@@ -511,6 +511,7 @@ async function checkAttack(req,res){
 
 async function attack(req,res){//attack process in general
   try{//the request should contain {initalL: land_no , attackedL:land_no, attackedPatrol: "name"}
+  
   let {initialL,attackedL,attackedPatrol,soldiers} = req.body
   let initialLand = await Land.findOne({land_no : initialL}).exec()
   let attackedLand = await Land.findOne({land_no : attackedL}).exec()
@@ -589,6 +590,7 @@ async function getFeeding(req,res){
   let patrol = await Patrol.findOne({name: patrolName}).exec()
   let land = await Land.findOne({lane_no : req.landNo}).exec()
   let unfed = land.houses - land.fed 
+  console.log("totalHouses : "+ land.houses + " unfed : " + unfed + " watermelon : " + land.inventory.watermelon  + " apple " + land.inventory.apple + " wheat : " + land.inventory.wheat)
   return res.status(200).send({"totalHouses":land.houses ,"unfed" : unfed , watermelon : land.inventory.watermelon,apple : land.inventory.apple,wheat : land.inventory.wheat})
   }catch(err){
     return res.status(500).send({message: "getFeeding error"})

@@ -231,14 +231,14 @@ return {code:200 , message:"success"}
 async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insiede
   // let assetType = await Asset.findOne({asset:type}).exec() testing the removal and replacing with type
   //may be removed in the future and replaced by type for further optmization
-  console.log(landNumber)
-  console.log(pat)
+  console.log("taking from land number :" + landNumber)
+  console.log("the patrol : "+ pat.name)
   // land = await Land.findOne({land_no : landNumber}).exec()
-  console.log(land)
+  console.log("taking from land : " + land.inventory.apple)
   if(landNumber !== 0){ //if the asset is land specific
   if(! land.patrol_ID.equals(pat._id)){
-    console.log(land.patrol_ID)
-    console.log(pat._id)
+    console.log("the land's patrol id" + land.patrol_ID)
+    console.log("the patrol id " + pat._id)
     throw {code:400, message:`this land doesn't belong to the ${pat.name}`}
   }
   if(type === "soldier"){
@@ -247,6 +247,8 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
     land.soldiers -= quantity
     pat.tot_sol -= quantity
     }else{
+      console.log("land.soldiers" + land.soldiers + "quality" + quantity)
+      console.log(" land.soldiers >= quantity : " + !!(land.soldiers >= quantity))
       throw {code:400, message:`the ${pat.name} doesn't have this much soldiers`}
     }
   }else{
@@ -255,6 +257,8 @@ async function takeHelper(pat,quantity,type,land,landNumber){// no fetching insi
     land.inventory[type] -= quantity
     pat[type] -= quantity
     }else{
+        console.log(`land.inventory ${type} : ` + !!(land.inventory[type] >= quantity))
+        console.log("the exsisting " + land.inventory[type] + " quantity : " + quantity)
        throw {code:400, message:`the ${pat.name} doesn't have this much resources`}
     }
   }
@@ -278,6 +282,8 @@ function between(upper , lower , number){
 
 async function trade(req,res){
   let {patrol1,patrol2,quantity1,quantity2,type1,type2,SLand1,SLand2,DLand1,DLand2} = req.body
+  console.log("the request body " + patrol1 + " " + patrol2 + " " + quantity1 + " " +quantity2 + " " + type1 + " " + type2 + " " +SLand1 + " " + SLand2 + " "+ DLand1 + " " + DLand2)
+  console.log(typeof(SLand1) + " " +typeof(SLand2) + " " + typeof(DLand1)+ " " + typeof(DLand2))
   if(patrol1 === patrol2){
     return res.status(400).send({message:"the two patrols are the same",success:false})
   }

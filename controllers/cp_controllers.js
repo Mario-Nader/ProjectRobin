@@ -590,7 +590,8 @@ async function getFeeding(req,res){
   let patrol = await Patrol.findOne({name: patrolName}).exec()
   let land = await Land.findOne({lane_no : req.landNo}).exec()
   let unfed = land.houses - land.fed 
-  console.log("totalHouses : "+ land.houses + " unfed : " + unfed + " watermelon : " + land.inventory.watermelon  + " apple " + land.inventory.apple + " wheat : " + land.inventory.wheat)
+  console.log("totalHouses : "+ land.houses + " unfed : " + unfed + " watermelon : " + land.inventory.watermelon  + " apple " + land.inventory.apple + " wheat : " + land.inventory.wheat + " the land number : " + req.landNo)
+  console.log( "the land : " + land)
   return res.status(200).send({"totalHouses":land.houses ,"unfed" : unfed , watermelon : land.inventory.watermelon,apple : land.inventory.apple,wheat : land.inventory.wheat})
   }catch(err){
     return res.status(500).send({message: "getFeeding error"})

@@ -9,7 +9,9 @@ const cpRoute = require('./routes/cpRoutes.js')
 const chefRoute = require('./routes/chefRoutes.js')
 const scoutRoute = require('./routes/scoutRoutes.js')
 
-app.options('*', cors());
+app.use(cookieParser());
+app.use(express.json());
+// app.options('*', cors());
 // CORS middleware (must be before routes)
 app.use(cors({
     origin: (process.env.CLIENT_URL ||'http://localhost:5173'), // <-- Change to your frontend's URL/port
@@ -18,8 +20,11 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
-app.use(cookieParser());
-app.use(express.json());
+app.use((req, res, next) => {
+    console.log("📥 Request received →", req.method, req.originalUrl);
+    next();
+});
+
 
 app.use('/Chef', chefRoute);
 app.use('/CP', cpRoute);

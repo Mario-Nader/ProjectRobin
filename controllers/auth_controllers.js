@@ -51,7 +51,7 @@ async function  signup(req,res){
         });
         // console.log(scout.name)
         token = createToken(scout._id,pat.name);
-        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30,secure:true,samesite:none});
+        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30,secure:true,sameSite:"None"});
         await scout.save();
         // console.log("the user is saved")
         res.status(201).json({
@@ -90,7 +90,7 @@ const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec()
                     }
                     let pat = await Patrol.findOne({_id : scout.patrol}) 
                     token = createToken(scout._id ,pat.name)
-                    res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000,secure:true,samesite:"none"})
+                    res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000,secure:true,sameSite:"None"})
                     res.status(200).json({"success":true,"user":{"username":scout.name,"rank":rank}})
                 }
                 else{

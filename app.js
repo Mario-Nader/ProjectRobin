@@ -12,7 +12,9 @@ const scoutRoute = require('./routes/scoutRoutes.js')
 // CORS middleware (must be before routes)
 app.use(cors({
     origin: (process.env.CLIENT_URL ||'http://localhost:5173'), // <-- Change to your frontend's URL/port
-    credentials: true
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type'],
 }));
 
 app.use(cookieParser());

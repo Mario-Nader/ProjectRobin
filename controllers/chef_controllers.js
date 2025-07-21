@@ -109,6 +109,9 @@ async function harvest(req, res) {
       element.inventory.apple += element.soils.apple
       element.inventory.watermelon += element.soils.watermelon
       element.inventory.wheat += element.soils.wheat
+      pats[element.patrol_ID].apple += element.soils.apple
+      pats[element.patrol_ID].watermelon += element.soils.watermelon
+      pats[element.patrol_ID].wheat += element.soils.wheat
     }
   })
   let chuncksize = 10 //this is chunck size saves to reduce the risk of overloading the connections with the databases

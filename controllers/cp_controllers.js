@@ -612,6 +612,7 @@ async function getFeeding(req,res){
 
 async function feeding(req,res){  
   let {numberOfHouses,landNo,watermelon,apple,wheat} = req.body
+  console.log("the number of houses : " + req.numberOfHouses + "the landNo : " + landNo + "watermelon : " + watermelon + " apple : " + apple + " wheat : " + wheat)
   let land = await Land.findOne({land_no : landNo}).exec()
   let user = await Scout.findOne({_id : req.id}).exec()
   let patrol = await Patrol.findOne({_id : user.patrol}).exec()
@@ -669,7 +670,7 @@ async function feeding(req,res){
       food -= exceeded.apples * 2
     }
     if(food - neededFood > 1 && wheat > 0){
-      ex = parseInt(MMath.floor((food - neededFood)))
+      ex = parseInt(Math.floor((food - neededFood)))
       if (wheat >= ex){
         exceeded.wheats = ex
       }else{

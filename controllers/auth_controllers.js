@@ -51,7 +51,7 @@ async function  signup(req,res){
         });
         // console.log(scout.name)
         token = createToken(scout._id,pat.name);
-        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30,secure:true,sameSite:"None"});
+        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30,secure:true,sameSite:"None"});////////////////secure:true,sameSite:"None"
         await scout.save();
         // console.log("the user is saved")
         res.status(201).json({
@@ -69,11 +69,6 @@ async function  signup(req,res){
 }
 
 async function login(req,res){
-    console.log("🟡 Login request received");
-    console.log("→ Method:", req.method);
-    console.log("→ Headers:", req.headers);
-    console.log("→ Body:", req.body);
-    console.log("→ Cookies:", req.cookies);
     let {name,password} = req.body;
     console.log(name)
     // console.log("Request body:", req.body);
@@ -81,7 +76,6 @@ async function login(req,res){
 const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec();
 // console.log("Scout found:", scout); for logging only
         if(scout){
-            console.log("🟢 Scout found:", scout);
                 if(scout.password == password){
                     let rank = 0
                     if(scout.cp == true){
@@ -96,9 +90,7 @@ const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec()
                     }
                     let pat = await Patrol.findOne({_id : scout.patrol}) 
                     token = createToken(scout._id ,pat.name)
-                    console.log("📦 Token:", token);
-                    res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000,secure:true,sameSite:"None"})
-                    console.log("✅ Login success, cookie sent.");
+                    res.cookie("token",token,{httpOnly:true,maxAge:30*24*60*60*1000,secure:true,sameSite:"None"})////////////////////////
                     res.status(200).json({"success":true,"user":{"username":scout.name,"rank":rank}})
                 }
                 else{
@@ -115,9 +107,13 @@ const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec()
 
 function authenMid(req,res,next){
     const token = req.cookies.token;
+    console.log("entered authenMid")
+    console.log(token)
+    console.log(req.cookies.token)
     if(token){
         jwt.verify(token,process.env.secretTokenString,(err,decodedToken)=>{
             if(err){
+                console.log("verification err")
                 return res.status(400).json({"msg":"you must be loged in to enter this page"})
             }else{
                 next()
@@ -125,6 +121,7 @@ function authenMid(req,res,next){
         })
         
     }else{
+        console.log("no token at all")
         return res.status(400).json({"msg":"you must be loged in to enter this page"})
     }
 }

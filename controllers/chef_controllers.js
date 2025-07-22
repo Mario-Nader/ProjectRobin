@@ -71,7 +71,7 @@ async function getharvest(req,res){
 
 async function watering(req,res){
   let farmingAsset = await Asset.findOne({asset : "farming" }).exec()
-  let pat = req.body.patrol
+  let pat = req.body.patrol?.toLowerCase()
   let patrol = await Patrol.findOne({name:pat},{_id:1,farming:1,coins:1}).exec()
   if(patrol){
   if(patrol.farming){

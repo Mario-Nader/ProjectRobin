@@ -107,9 +107,6 @@ const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec()
 
 function authenMid(req,res,next){
     const token = req.cookies.token;
-    console.log("entered authenMid")
-    console.log(token)
-    console.log(req.cookies.token)
     if(token){
         jwt.verify(token,process.env.secretTokenString,(err,decodedToken)=>{
             if(err){

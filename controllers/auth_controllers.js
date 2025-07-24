@@ -51,7 +51,7 @@ async function  signup(req,res){
         });
         // console.log(scout.name)
         token = createToken(scout._id,pat.name);
-        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30,secure:true,sameSite:"None"});////////////////secure:true,sameSite:"None"
+        res.cookie('token',token,{httpOnly:true, maxAge:24*60*60*1000*30,secure:true,sameSite:"None"});////////////////
         await scout.save();
         // console.log("the user is saved")
         res.status(201).json({
@@ -60,8 +60,12 @@ async function  signup(req,res){
           });
     }catch(err){
         console.log(err)
-        if(err.errorResponse.code == 11000){
-            return res.status(400).send({message:"this username is already registered"})
+        if(err.errorResponse.code){
+            if(err.errorResponse.code == 11000){
+                return res.status(400).send({message:"this username is already registered"})
+            }else{
+                return res.status(500).send({message:"error in signup"})
+            }
         }else{
         return res.status(500).json({success:false,message:"couldn't create the user"});
         }

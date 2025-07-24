@@ -440,11 +440,15 @@ async function watering(req,res){//watering may end up in the chef controllers
 async function getAttackKadr(req,res){
   try{//get the conditions of the land using attacked land only from the request
     //and get the qualifications of the patrol
+  console.log("body : " + JSON.stringify(req.body) + "query : " + JSON.stringify(req.query))
   let patName = req.patrol
   let patrol = await Patrol.findOne({name : patName}).exec()
-  let attackedLand = await Land.findOne({land_no : req.query.landNo}).exec()
-  let land = await Land.findOne({land_no : req.query.attackedLand}).exec()
+  let attackedLand = await Land.findOne({land_no : req.query.attackedLand}).exec()
+  let land = await Land.findOne({land_no : req.query.landNo}).exec()
+  console.log("attackedLand: " + attackedLand)
+  console.log("land : " + land)
   let conditions = attackedLand.conditions
+  console.log(conditions)
   let qualifications = {}
   qualifications.soldiers = patrol.tot_sol
   qualifications.houses = patrol.tot_houses
@@ -452,7 +456,7 @@ async function getAttackKadr(req,res){
   qualifications.coins = patrol.coins
   return res.status(200).send({"conditions":conditions ,"qualifications":qualifications})
   }catch(err){
-    console.log(err.message)
+    console.log(err)
     return res.status(500).send({message:"error in getAttackKadr functions"})
   }
 }

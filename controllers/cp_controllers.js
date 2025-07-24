@@ -511,14 +511,14 @@ async function checkAttack(req,res){
   }if(! initialPat._id.equals(initialLand.patrol_ID)){
     return res.status(400).send({message:"the patrol doesn't own this land"})
   }else {  
-  if(initialLand.patrol_ID.equals(kadr.id)){
+  if(targetLand.patrol_ID.equals(kadr.id)){
     return res.status(200).send({attacked:"kadr"})
   }else{
     return res.status(200).send({attacked:"patrol"})
   }
 }
 }catch(err){
-  console.log(err)
+  console.log(err.message)
   return res.status(500).send({"message":"error in checkAttack"})
 }
 }

@@ -3,15 +3,10 @@ const Patrol = require("../modules/patrol_module")
 const Asset = require("../modules/assets_module")
 const Scout = require("../modules/scout_module")
 
-
-//land doesn't belong to the patrol in give , trad , take 
-
-
 async function view_scores(req,res){
   let  patrols = await Patrol.find({"name":{$ne:"kadr"}}).exec();
   return patrols
 }
-
 
 async function update_scores(req,res){
   let user = await Scout.findById(req.id).exec()
@@ -132,6 +127,9 @@ catch(err){
 
 async function give(req,res){
   let {patrol,quantity,type,landNumber} = req.body
+  if(!patrol){
+    return res.status(400).send({"message":"an error happened while sending the patrol please try again after choosing the patrol correctly"})
+  }
   // let assetType = await Asset.findOne({asset:type}).exec()
   //may be removed in the future and replaced by type for further optmization
   let pat = await Patrol.findOne({name : patrol}).exec()
@@ -141,7 +139,7 @@ async function give(req,res){
   }
   let land = await Land.findOne({land_no : landNumber}).exec()
   if(! land.patrol_ID.equals(pat._id)){
-    return res.status(400).send({
+    return res.status(400).send({//cannot read properties of null reading _id
       message:`this land doesn't belong to the ${pat.name}`
       ,success:false
     })
@@ -155,7 +153,7 @@ async function give(req,res){
   }
   await land.save()
 }else{
-  pat[type] += quantity
+  pat[type] += quantity //cannot read properties of null reading conins
 }
 await pat.save()
 return res.status(200).send({success:true})
@@ -164,6 +162,9 @@ return res.status(200).send({success:true})
 
 async function take(req,res){//the patrol must have the land(must be handled)
   let {patrol,quantity,type,landNumber} = req.body
+  if(!patrol || patrol === null){
+    return res.status(400).send({"message":"an error happened while sending the patrol please try again after choosing the patrol correctly"})
+  }
   // let assetType = await Asset.findOne({asset:type}).exec()//may be removed in the future and replaced by type for further optmization
   let pat = await Patrol.findOne({name : patrol}).exec()
   if(landNumber !== 0){ //if the asset is land specific
@@ -199,7 +200,7 @@ async function take(req,res){//the patrol must have the land(must be handled)
   }
   await land.save()
 }else{
-  pat[type] -= quantity
+  pat[type] -= quantity //cannot read properties of null reading coins
 }
 await pat.save()
 return res.status(200).send({success:true})
@@ -285,6 +286,12 @@ function between(upper , lower , number){
 
 async function trade(req,res){
   let {patrol1,patrol2,quantity1,quantity2,type1,type2,SLand1,SLand2,DLand1,DLand2} = req.body
+  if(!patrol1 || patrol2 === null){
+    return res.status(400).send({"message":"an error happened while sending the patrol please try again after choosing the patrol correctly"})
+  }
+  if(!patrol2 || patrol2 === null){
+    return res.status(400).send({"message":"an error happened while sending the patrol please try again after choosing the patrol correctly"})
+  }
   console.log("the request body " + patrol1 + " " + patrol2 + " " + quantity1 + " " +quantity2 + " " + type1 + " " + type2 + " " +SLand1 + " " + SLand2 + " "+ DLand1 + " " + DLand2)
   console.log(typeof(SLand1) + " " +typeof(SLand2) + " " + typeof(DLand1)+ " " + typeof(DLand2))
   if(patrol1 === patrol2){

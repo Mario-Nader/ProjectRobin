@@ -2,9 +2,7 @@ const express = require('express')
 const router = express.Router()
 const cp_controller = require('../controllers/cp_controllers')
 const auth = require('../controllers/auth_controllers')
-// ,auth.authenMid,auth.verifyUser,
 router.use(auth.authenMid,auth.verifyUser,auth.CPvalidation)
-
 router.patch('/transport/process',auth.closedRejection,cp_controller.transport)
 router.patch('/transport',cp_controller.twoLandsResources)
 router.patch('/buy',auth.closedRejection,cp_controller.buy)

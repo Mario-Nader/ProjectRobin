@@ -396,11 +396,21 @@ async function getGDP(req,res){
 async function addGDP(req,res){
   try{
     let patrols = await Patrol.find({name : {$ne : "kadr"}}, {_id: 1 , fed : 1 , name:1,coins:1}).exec()
+    let landArr = await Land.find().exec()
+    landArr.forEach((element)=>{
+      element.fed = 0
+    })
     patrols.forEach((element)=>{
       element.coins += element.fed * 25
       element.fed = 0
     })
     await Promise.all(patrols.map( (patrol)=> patrol.save()))// six patrols don't need batching technique but if for some reason more patrols were to be added batching technique will be needed
+    let chuncksize = 10 //this is chunck size saves to reduce the risk of overloading the connections with the databases
+  for(let i = 0; i < landArr.length; i += chuncksize){
+    let chunck = landArr.slice(i , i + chuncksize)
+    await Promise.all(chunck.map(land => land.save()))
+  }
+    
     return res.status(200).send({message:"the GDP was added successfully"})
 }catch(err){
     return res.status(500).send({message:"error in the addGDP function"})

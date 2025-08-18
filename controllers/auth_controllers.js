@@ -38,7 +38,7 @@ function createToken(id,patrol){
 async function  signup(req,res){
     let {name,password,cp,patrol} = req.body;
     try{
-        let pat = await Patrol.findOne({name:patrol})
+        let pat = await Patrol.findOne({name:patrol}) //   ----> nosql
         // console.log(pat.name)
         if(!pat){
             return res.status(400).send({message:"this patrol doesn't exist"})
@@ -80,7 +80,7 @@ async function login(req,res){
 const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec();
 // console.log("Scout found:", scout); for logging only
         if(scout){
-                if(scout.password == password){
+                if(scout.password == password){ // ----> no password hashing
                     let rank = 0
                     if(scout.cp == true){
                         rank = 2
@@ -109,8 +109,8 @@ const scout = await Scout.findOne({ name: new RegExp(`^${name}$`, 'i') }).exec()
     }
 }
 
-function authenMid(req,res,next){
-    const token = req.cookies.token;
+function authenMid(req,res,next){ 
+    const token = req.cookies.token; 
     if(token){
         jwt.verify(token,process.env.secretTokenString,(err,decodedToken)=>{
             if(err){
@@ -166,7 +166,7 @@ function logout(req,res){
     }
 }
 
-async function CPvalidation(req,res,next){
+async function CPvalidation(req,res,next){ // -->
     let user = await Scout.findOne({_id : req.id}).exec()
     if(user.cp){
         next()

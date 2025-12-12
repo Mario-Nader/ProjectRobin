@@ -528,7 +528,7 @@ async function checkAttack(req,res){
 }
 
 async function attack(req,res){//attack process in general
-  try{//the request should contain {initalL: land_no , attackedL:land_no, attackedPatrol: "name"}
+  try{//the request should contain {initalL: land_no , attackedL:land_no, attackedPatrol: "name", soldiers :number}
   
   let {initialL,attackedL,attackedPatrol,soldiers} = req.body
   let initialLand = await Land.findOne({land_no : initialL}).exec()
@@ -561,7 +561,7 @@ async function attack(req,res){//attack process in general
       initialLand.soldiers += Math.floor(soldiers / 2) + 1
       attackedLand.soldiers = Math.floor(soldiers / 2)
     }
-    initialPat.tot_sol += soldiers
+    // initialPat.tot_sol += soldiers
     attackedLand.patrol_ID = initialPat._id
     attackedPat.tot_lands -= 1
     initialPat.tot_lands += 1
